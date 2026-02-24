@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DCP サイトマップ一覧</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3a4d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+      --success: #3fb950;
+      --warning: #d29922;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+    .container { max-width: 960px; margin: 0 auto; }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .toolbar label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+    .toolbar select {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .toolbar input[type="search"] {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.875rem;
+      min-width: 200px;
+    }
+    .toolbar input[type="search"]::placeholder { color: var(--muted); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    th, td {
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      background: rgba(0,0,0,0.2);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(88, 166, 255, 0.06); }
+    td a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    td a:hover { color: var(--accent-hover); text-decoration: underline; }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .badge-en { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+    .badge-jp { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+    .badge-priority { background: rgba(88, 166, 255, 0.2); color: var(--accent); }
+    .priority-bar {
+      width: 60px;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .priority-bar span {
+      display: block;
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+    }
+    .count { color: var(--muted); font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>DCP サイトマップ一覧</h1>
+    <p class="subtitle">stg-ipark-dcp.deca-team.dev のURL一覧（クリックで開く）</p>
+    <p><a href="transition-map.html" style="color: var(--accent); text-decoration: none;">→ ページ遷移マップを見る</a></p>
+
+    <div class="toolbar">
+      <label>
+        言語
+        <select id="filter-lang">
+          <option value="">すべて</option>
+          <option value="en">English</option>
+          <option value="jp">日本語</option>
+        </select>
+      </label>
+      <label>
+        パス
+        <select id="filter-path">
+          <option value="">すべて</option>
+          <option value="/">/ (トップ)</option>
+          <option value="/login">/login</option>
+          <option value="/lp/">/lp/</option>
+          <option value="/contact">/contact</option>
+          <option value="/thanks">/thanks</option>
+          <option value="/privacy">/privacy</option>
+          <option value="/terms">/terms</option>
+          <option value="/signup">/signup</option>
+        </select>
+      </label>
+      <label>
+        <input type="search" id="search" placeholder="URLで検索..." />
+      </label>
+    </div>
+
+    <p class="count">表示: <span id="count">0</span> 件</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>URL</th>
+          <th>言語</th>
+          <th>優先度</th>
+          <th>更新頻度</th>
+          <th>最終更新</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const entries = [
+      { loc: "https://stg-ipark-dcp.deca-team.dev/", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "weekly", priority: 1 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/login", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.6 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/en/1", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.8 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/en/2", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.8 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/en/3", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.8 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/en/4", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.8 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/en/5", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.8 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/en/contact", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.7 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/en/contact/thanks", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.3 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/en/thanks", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.3 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/jp/1", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.8 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/jp/2", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.8 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/jp/3", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.8 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/jp/4", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.8 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/jp/5", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.8 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/jp/contact", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.7 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/jp/contact/thanks", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.3 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/lp/jp/thanks", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.3 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/privacy", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "yearly", priority: 0.4 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/signup", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.6 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/signup/confirmation", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "monthly", priority: 0.6 },
+      { loc: "https://stg-ipark-dcp.deca-team.dev/terms", lastmod: "2026-02-05T02:07:05.971Z", changefreq: "yearly", priority: 0.4 },
+    ];
+
+    function getLang(loc) {
+      if (loc.includes("/lp/en/")) return "en";
+      if (loc.includes("/lp/jp/")) return "jp";
+      return "";
+    }
+
+    function getPath(loc) {
+      try {
+        const u = new URL(loc);
+        if (u.pathname === "/") return "/";
+        if (u.pathname.startsWith("/lp/")) return "/lp/";
+        if (u.pathname.includes("contact")) return "/contact";
+        if (u.pathname.includes("thanks")) return "/thanks";
+        return u.pathname;
+      }
+      return loc;
+    }
+
+    function formatDate(iso) {
+      try {
+        const d = new Date(iso);
+        return d.toLocaleString("ja-JP", { dateStyle: "short", timeStyle: "short" });
+      }
+      return iso;
+    }
+
+    function render(list) {
+      const tbody = document.getElementById("tbody");
+      const countEl = document.getElementById("count");
+      countEl.textContent = list.length;
+
+      tbody.innerHTML = list.map(e => {
+        const lang = getLang(e.loc);
+        const langBadge = lang === "en" ? '<span class="badge badge-en">EN</span>' : lang === "jp" ? '<span class="badge badge-jp">JP</span>' : "-";
+        const pct = Math.round((e.priority || 0) * 100);
+        return `<tr>
+          <td><a href="${e.loc}" target="_blank" rel="noopener">${e.loc}</a></td>
+          <td>${langBadge}</td>
+          <td><div class="priority-bar"><span style="width:${pct}%"></span></div> ${e.priority}</td>
+          <td>${e.changefreq || "-"}</td>
+          <td>${formatDate(e.lastmod)}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    function getPathname(loc) {
+      try { return new URL(loc).pathname; } catch (_) { return ""; }
+    }
+
+    function applyFilters() {
+      const lang = document.getElementById("filter-lang").value;
+      const path = (document.getElementById("filter-path").value || "").trim();
+      const q = (document.getElementById("search").value || "").trim().toLowerCase();
+
+      let list = (typeof entries !== "undefined" ? entries : []).filter(function(e) {
+        if (lang && getLang(e.loc) !== lang) return false;
+        var pathname = getPathname(e.loc);
+        if (path) {
+          if (path === "/") {
+            if (pathname !== "/") return false;
+          } else if (path === "/lp/") {
+            if (!pathname.startsWith("/lp/")) return false;
+          } else {
+            if (pathname !== path && !pathname.startsWith(path + "/")) return false;
+          }
+        }
+        if (q && !e.loc.toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      render(list);
+    }
+
+    document.getElementById("filter-lang").addEventListener("change", applyFilters);
+    document.getElementById("filter-path").addEventListener("change", applyFilters);
+    document.getElementById("search").addEventListener("input", applyFilters);
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", applyFilters);
+    } else {
+      applyFilters();
+    }
+  </script>
+</body>
+</html>

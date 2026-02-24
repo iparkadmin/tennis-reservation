@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background-color: #16145F; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+    <h1 style="margin: 0; font-size: 24px;">iPark テニスコート予約システム</h1>
+  </div>
+  
+  <div style="background-color: #ffffff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px;">
+    <p style="font-size: 16px; margin-bottom: 20px;">
+      この度は、テニスコート予約システムにご登録いただき、誠にありがとうございます。
+    </p>
+    
+    <p style="font-size: 16px; margin-bottom: 20px;">
+      ご登録いただいたメールアドレスを確認するため、以下のリンクをクリックしてください。
+    </p>
+    
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="{{.ConfirmationURL}}" style="display: inline-block; background-color: #16145F; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; font-size: 16px; font-weight: bold;">
+        メールアドレスを確認する
+      </a>
+    </div>
+    
+    <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
+      <p style="margin: 0; font-size: 14px;">
+        <strong>⚠️ 重要：</strong><br>
+        このリンクは24時間有効です。24時間を過ぎた場合は、再度メール認証のリクエストを行ってください。
+      </p>
+    </div>
+    
+    <p style="font-size: 14px; color: #666; margin-top: 30px;">
+      もし、このメールに心当たりがない場合は、このメールを無視してください。<br>
+      リンクをクリックしない限り、アカウントは有効化されません。
+    </p>
+    
+    <p style="font-size: 14px; color: #666;">
+      リンクがクリックできない場合は、以下のURLをブラウザにコピー＆ペーストしてください：<br>
+      <span style="word-break: break-all; color: #0067B1;">{{.ConfirmationURL}}</span>
+    </p>
+  </div>
+  
+  <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
+  <p style="font-size: 12px; color: #666; line-height: 1.6;">
+    <strong>運営会社</strong><br>
+    iPark Institute Co., Ltd.<br>
+    <br>
+    <a href="https://tennis-court-reservation-app.vercel.app/privacy-policy" style="color: #0067B1;">プライバシーポリシー</a>
+  </p>
+  <p style="font-size: 11px; color: #999; margin-top: 20px;">
+    ※このメールは送信専用です。返信はできません。
+  </p>
+</body>
+</html>

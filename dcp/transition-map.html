@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DCP ページ遷移マップ</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3a4d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-hover: #79b8ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; font-weight: 600; margin: 0 0 0.5rem; }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .nav-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .nav-link:hover { text-decoration: underline; }
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .section h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 1rem;
+      color: var(--muted);
+    }
+    .mermaid-wrap {
+      background: #fff;
+      border-radius: 8px;
+      padding: 1rem;
+      overflow: auto;
+      margin-bottom: 1rem;
+    }
+    .mermaid { text-align: center; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    th, td {
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      font-weight: 600;
+      color: var(--muted);
+    }
+    td a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    td a:hover { text-decoration: underline; }
+    .path { font-family: ui-monospace, monospace; font-size: 0.85em; }
+    .lang-en { color: #3fb950; }
+    .lang-jp { color: #d29922; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="nav-link" href="index.html">← URL一覧に戻る</a>
+    <h1>DCP ページ遷移マップ</h1>
+    <p class="subtitle">想定されるページ間の遷移関係（URL構造と一般的なLP・認証フローに基づく）</p>
+
+    <div class="section">
+      <h2>遷移図（全体）</h2>
+      <div class="mermaid-wrap">
+        <div class="mermaid" id="mermaid-main"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>英語 LP フロー (en)</h2>
+      <div class="mermaid-wrap">
+        <div class="mermaid" id="mermaid-en"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>日本語 LP フロー (jp)</h2>
+      <div class="mermaid-wrap">
+        <div class="mermaid" id="mermaid-jp"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>遷移一覧（From → To）</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>遷移元</th>
+            <th>遷移先</th>
+            <th>備考</th>
+          </tr>
+        </thead>
+        <tbody id="transitions"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const BASE = "https://stg-ipark-dcp.deca-team.dev";
+
+    // 遷移関係の定義（from path → to paths）
+    const transitions = [
+      { from: "/", to: ["/login", "/signup", "/lp/en/1", "/lp/jp/1", "/privacy", "/terms"], note: "トップからのリンク" },
+      { from: "/login", to: ["/"], note: "ログイン後・戻る" },
+      { from: "/signup", to: ["/signup/confirmation", "/"], note: "登録送信" },
+      { from: "/signup/confirmation", to: ["/login", "/"], note: "確認後" },
+      { from: "/lp/en/1", to: ["/lp/en/2", "/lp/en/contact"], note: "EN LP" },
+      { from: "/lp/en/2", to: ["/lp/en/3", "/lp/en/contact"], note: "" },
+      { from: "/lp/en/3", to: ["/lp/en/4", "/lp/en/contact"], note: "" },
+      { from: "/lp/en/4", to: ["/lp/en/5", "/lp/en/contact"], note: "" },
+      { from: "/lp/en/5", to: ["/lp/en/contact", "/lp/en/thanks"], note: "" },
+      { from: "/lp/en/contact", to: ["/lp/en/contact/thanks"], note: "問い合わせ送信" },
+      { from: "/lp/en/contact/thanks", to: ["/lp/en/1", "/"], note: "" },
+      { from: "/lp/en/thanks", to: ["/lp/en/1", "/"], note: "" },
+      { from: "/lp/jp/1", to: ["/lp/jp/2", "/lp/jp/contact"], note: "JP LP" },
+      { from: "/lp/jp/2", to: ["/lp/jp/3", "/lp/jp/contact"], note: "" },
+      { from: "/lp/jp/3", to: ["/lp/jp/4", "/lp/jp/contact"], note: "" },
+      { from: "/lp/jp/4", to: ["/lp/jp/5", "/lp/jp/contact"], note: "" },
+      { from: "/lp/jp/5", to: ["/lp/jp/contact", "/lp/jp/thanks"], note: "" },
+      { from: "/lp/jp/contact", to: ["/lp/jp/contact/thanks"], note: "問い合わせ送信" },
+      { from: "/lp/jp/contact/thanks", to: ["/lp/jp/1", "/"], note: "" },
+      { from: "/lp/jp/thanks", to: ["/lp/jp/1", "/"], note: "" },
+      { from: "/privacy", to: ["/"], note: "フッター等" },
+      { from: "/terms", to: ["/"], note: "フッター等" },
+    ];
+
+    function pathToId(p) {
+      return p.replace(/^\//, "").replace(/\//g, "_") || "root";
+    }
+
+    function pathToLabel(p) {
+      if (p === "/") return "トップ";
+      return p;
+    }
+
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "neutral",
+      securityLevel: "loose",
+      flowchart: {
+        useMaxWidth: true,
+        htmlLabels: true,
+        curve: "basis",
+      },
+    });
+
+    const mermaidMain = `
+flowchart LR
+  subgraph top["トップ周辺"]
+    root["/ トップ"]
+    login["/login"]
+    signup["/signup"]
+    signup_c["/signup/confirmation"]
+    privacy["/privacy"]
+    terms["/terms"]
+  end
+  subgraph en["LP English"]
+    en1["/lp/en/1"]
+    en2["/lp/en/2"]
+    en3["/lp/en/3"]
+    en4["/lp/en/4"]
+    en5["/lp/en/5"]
+    en_contact["/lp/en/contact"]
+    en_thanks["/lp/en/thanks"]
+    en_ct["/lp/en/contact/thanks"]
+  end
+  subgraph jp["LP 日本語"]
+    jp1["/lp/jp/1"]
+    jp2["/lp/jp/2"]
+    jp3["/lp/jp/3"]
+    jp4["/lp/jp/4"]
+    jp5["/lp/jp/5"]
+    jp_contact["/lp/jp/contact"]
+    jp_thanks["/lp/jp/thanks"]
+    jp_ct["/lp/jp/contact/thanks"]
+  end
+  root --> login
+  root --> signup
+  root --> en1
+  root --> jp1
+  root --> privacy
+  root --> terms
+  signup --> signup_c
+  en1 --> en2
+  en2 --> en3
+  en3 --> en4
+  en4 --> en5
+  en5 --> en_contact
+  en5 --> en_thanks
+  en_contact --> en_ct
+  jp1 --> jp2
+  jp2 --> jp3
+  jp3 --> jp4
+  jp4 --> jp5
+  jp5 --> jp_contact
+  jp5 --> jp_thanks
+  jp_contact --> jp_ct
+`;
+
+    const mermaidEn = `
+flowchart LR
+  e1["/lp/en/1"]
+  e2["/lp/en/2"]
+  e3["/lp/en/3"]
+  e4["/lp/en/4"]
+  e5["/lp/en/5"]
+  ec["/lp/en/contact"]
+  et["/lp/en/thanks"]
+  ect["/lp/en/contact/thanks"]
+  e1 --> e2
+  e1 --> ec
+  e2 --> e3
+  e2 --> ec
+  e3 --> e4
+  e3 --> ec
+  e4 --> e5
+  e4 --> ec
+  e5 --> ec
+  e5 --> et
+  ec --> ect
+  ect --> e1
+  et --> e1
+`;
+
+    const mermaidJp = `
+flowchart LR
+  j1["/lp/jp/1"]
+  j2["/lp/jp/2"]
+  j3["/lp/jp/3"]
+  j4["/lp/jp/4"]
+  j5["/lp/jp/5"]
+  jc["/lp/jp/contact"]
+  jt["/lp/jp/thanks"]
+  jct["/lp/jp/contact/thanks"]
+  j1 --> j2
+  j1 --> jc
+  j2 --> j3
+  j2 --> jc
+  j3 --> j4
+  j3 --> jc
+  j4 --> j5
+  j4 --> jc
+  j5 --> jc
+  j5 --> jt
+  jc --> jct
+  jct --> j1
+  jt --> j1
+`;
+
+    async function renderMermaid(elId, spec) {
+      try {
+        const { svg } = await mermaid.render(elId + "-id", spec);
+        document.getElementById(elId).innerHTML = svg;
+      } catch (e) {
+        document.getElementById(elId).innerHTML = "<p style='color:#8b949e'>図の描画に失敗しました: " + e.message + "</p>";
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("transitions");
+      let rows = [];
+      transitions.forEach(function (t) {
+        t.to.forEach(function (to) {
+          rows.push({
+            from: t.from,
+            to: to,
+            note: t.note,
+          });
+        });
+      });
+      tbody.innerHTML = rows
+        .map(
+          function (r) {
+            return (
+              "<tr><td class='path'><a href='" +
+              BASE + r.from + "' target='_blank'>" +
+              (r.from || "/") +
+              "</a></td><td class='path'><a href='" +
+              BASE + r.to +
+              "' target='_blank'>" +
+              r.to +
+              "</a></td><td>" +
+              (r.note || "") +
+              "</td></tr>"
+            );
+          }
+        )
+        .join("");
+    }
+
+    (async function () {
+      await renderMermaid("mermaid-main", mermaidMain);
+      await renderMermaid("mermaid-en", mermaidEn);
+      await renderMermaid("mermaid-jp", mermaidJp);
+      renderTable();
+    })();
+  </script>
+</body>
+</html>
