@@ -23,23 +23,12 @@ function ForgotPasswordForm() {
     setSent(false);
 
     try {
-      // パスワードリセット前に、プロフィールの存在確認
-      // 削除済みユーザーはauth.usersに存在するがprofilesに存在しない
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("email", email)
-        .single();
-
-      // プロフィールが存在しない場合、削除済みユーザー
-      if (!profileData) {
-        setError("このメールアドレスは登録されていません。新規登録を行ってください。");
-        setLoading(false);
-        return;
-      }
-
+      // ※profilesのRLSにより未ログイン時は検索不可のため、事前チェックは行わない
+      // auth.users に存在すれば Supabase がリセットメールを送信する
       const redirectTo =
-        (typeof window !== "undefined" ? window.location.origin : "") + "/login";
+        process.env.NEXT_PUBLIC_APP_URL
+          ? `${process.env.NEXT_PUBLIC_APP_URL}/login`
+          : (typeof window !== "undefined" ? window.location.origin : "") + "/login";
       const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo,
       });
