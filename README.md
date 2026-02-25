@@ -27,6 +27,8 @@ tennis-reservation/
 │   │   ├── 23_supabase_email_change_template_setup.md
 │   │   ├── SECURITY_AUDIT_REPORT.md
 │   │   └── SECURITY_EXPLANATION_FOR_AUDITORS.md
+│   ├── setup/                    # この PC 向けセットアップ
+│   │   └── SUPABASE_SQL_POWERSHELL_THIS_PC.md  # Node.js 不要・PowerShell で SQL 実行
 │   └── deployment/               # デプロイ関連ドキュメント
 │       ├── 06_vercel_deployment_guide.md
 │       ├── 07_vercel_env_variables.md
@@ -50,7 +52,8 @@ tennis-reservation/
 │   │       ├── 16_security_improvements.sql
 │   │       └── 17_additional_security.sql
 │   └── scripts/                  # データベーススクリプト
-│       └── 19_admin_queries.sql
+│       ├── 19_admin_queries.sql
+│       └── run-sql-via-api.ps1   # Supabase SQL 実行（Node.js 不要）
 │
 ├── app/                          # 💻 アプリケーションコード
 │   ├── src/, public/, package.json, README.md
@@ -81,6 +84,10 @@ tennis-reservation/
 4. **コート2面対応**（必須）
    - `database/supabase/migrations/05_database_update_for_courts.sql` を実行
    - `design/database/15_court_update_execution_guide.md` で手順参照
+
+**SQL を API で実行する場合**（Node.js が使えない PC 向け）:
+- `docs/deployment/SUPABASE_ACCESS_METHODS.md` 参照
+- `docs/setup/SUPABASE_SQL_POWERSHELL_THIS_PC.md` に手順あり
 
 ### 2. Vercelデプロイ
 

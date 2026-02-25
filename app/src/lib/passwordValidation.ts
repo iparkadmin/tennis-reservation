@@ -1,6 +1,8 @@
 /**
- * パスワードバリデーション（乗っ取り防止のためセキュアな要件）
- * NIST/OWASP ガイドラインに基づく
+ * パスワードバリデーション
+ * Supabase Auth（Authentication → Email）の設定に合わせる
+ * - Minimum password length: 8
+ * - Password Requirements: Lowercase, uppercase letters, digits and symbols
  */
 
 export const PASSWORD_REQUIREMENTS = {
@@ -13,7 +15,16 @@ export const PASSWORD_REQUIREMENTS = {
 } as const;
 
 export const PASSWORD_REQUIREMENTS_LABEL =
-  "8文字以上、大文字・小文字・数字・記号をそれぞれ1文字以上含めてください";
+  "8文字以上、小文字・大文字・数字・記号をそれぞれ1文字以上含めてください";
+
+/** チェックリスト表示用（Supabase の "Lowercase, uppercase letters, digits and symbols" に準拠） */
+export const PASSWORD_REQUIREMENTS_ITEMS = [
+  { key: "length", label: "8文字以上", test: (p: string) => p.length >= 8 },
+  { key: "lowercase", label: "小文字（a-z）", test: (p: string) => /[a-z]/.test(p) },
+  { key: "uppercase", label: "大文字（A-Z）", test: (p: string) => /[A-Z]/.test(p) },
+  { key: "digit", label: "数字（0-9）", test: (p: string) => /\d/.test(p) },
+  { key: "symbol", label: "記号（!@#$% など）", test: (p: string) => /[^A-Za-z0-9\s]/.test(p) },
+] as const;
 
 export type PasswordValidationResult = {
   valid: boolean;

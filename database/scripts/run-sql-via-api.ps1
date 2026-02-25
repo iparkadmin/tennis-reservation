@@ -36,7 +36,7 @@ $sql = Get-Content -Path $absPath -Raw -Encoding UTF8
 $url = "https://api.supabase.com/v1/projects/$projectRef/database/query"
 $body = @{ query = $sql } | ConvertTo-Json
 
-Write-Host "Supabase Management API で SQL を実行中..." -ForegroundColor Cyan
+Write-Host "Supabase Management API で SQL を実行中..."
 Write-Host "Project: $projectRef"
 Write-Host "File: $absPath"
 Write-Host "---"
@@ -51,7 +51,7 @@ try {
         -ContentType "application/json; charset=utf-8"
 
     if ($response.result) {
-        Write-Host "Result:" -ForegroundColor Green
+        Write-Host "Result:"
         $response.result | ConvertTo-Json -Depth 10
     }
     if ($response.error) {
@@ -64,4 +64,4 @@ try {
 }
 
 Write-Host "---"
-Write-Host "Done." -ForegroundColor Green
+Write-Host "Done."

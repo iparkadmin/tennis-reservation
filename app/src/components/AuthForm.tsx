@@ -8,6 +8,7 @@ import { EMAIL_IPARK_PORTAL_NOTICE } from "@/lib/constants";
 import {
   validatePassword,
   PASSWORD_REQUIREMENTS_LABEL,
+  PASSWORD_REQUIREMENTS_ITEMS,
 } from "@/lib/passwordValidation";
 
 type AuthMode = "login" | "signup";
@@ -456,9 +457,28 @@ export default function AuthForm() {
               パスワード
             </label>
             {mode === "signup" && (
-              <p className="text-xs text-on-background/70 mb-1.5">
-                {PASSWORD_REQUIREMENTS_LABEL}
-              </p>
+              <>
+                <p className="text-xs text-on-background/70 mb-1.5">
+                  {PASSWORD_REQUIREMENTS_LABEL}
+                </p>
+                <ul className="text-xs text-on-background/70 mb-2 space-y-1">
+                  {PASSWORD_REQUIREMENTS_ITEMS.map((item) => (
+                    <li
+                      key={item.key}
+                      className={`flex items-center gap-2 ${
+                        password && item.test(password)
+                          ? "text-primary-accent"
+                          : "text-on-background/60"
+                      }`}
+                    >
+                      <span className="w-4">
+                        {password && item.test(password) ? "✓" : "・"}
+                      </span>
+                      {item.label}
+                    </li>
+                  ))}
+                </ul>
+              </>
             )}
             <input
               type="password"

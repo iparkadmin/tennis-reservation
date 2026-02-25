@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import {
   validatePassword,
   PASSWORD_REQUIREMENTS_LABEL,
+  PASSWORD_REQUIREMENTS_ITEMS,
 } from "@/lib/passwordValidation";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -16,6 +17,7 @@ export default function LoginPage() {
   const [setPasswordLoading, setSetPasswordLoading] = useState(false);
   const [setPasswordError, setSetPasswordError] = useState<string | null>(null);
   const [recovering, setRecovering] = useState(false);
+  const [newPasswordValue, setNewPasswordValue] = useState("");
 
   // メール確認・パスワードリセットメールのリンクから戻ってきた場合を処理
   useEffect(() => {
@@ -142,7 +144,34 @@ export default function LoginPage() {
                 <div>
                   <label className="block text-sm font-medium text-on-background mb-2">新しいパスワード</label>
                   <p className="text-xs text-on-background/70 mb-1.5">{PASSWORD_REQUIREMENTS_LABEL}</p>
-                  <input type="password" name="newPassword" className="input" placeholder="••••••••" required minLength={8} autoComplete="new-password" />
+                  <ul className="text-xs text-on-background/70 mb-2 space-y-1">
+                    {PASSWORD_REQUIREMENTS_ITEMS.map((item) => (
+                      <li
+                        key={item.key}
+                        className={`flex items-center gap-2 ${
+                          newPasswordValue && item.test(newPasswordValue)
+                            ? "text-primary-accent"
+                            : "text-on-background/60"
+                        }`}
+                      >
+                        <span className="w-4">
+                          {newPasswordValue && item.test(newPasswordValue) ? "✓" : "・"}
+                        </span>
+                        {item.label}
+                      </li>
+                    ))}
+                  </ul>
+                  <input
+                    type="password"
+                    name="newPassword"
+                    className="input"
+                    placeholder="••••••••"
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    value={newPasswordValue}
+                    onChange={(e) => setNewPasswordValue(e.target.value)}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-on-background mb-2">パスワード（確認）</label>

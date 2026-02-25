@@ -54,6 +54,11 @@
 - **[app/SECURITY_EXPLANATION_FOR_AUDITORS.md](./app/SECURITY_EXPLANATION_FOR_AUDITORS.md)**
   - 監査者向けセキュリティ説明書
 
+### この PC 向けセットアップ
+
+- **[setup/SUPABASE_SQL_POWERSHELL_THIS_PC.md](./setup/SUPABASE_SQL_POWERSHELL_THIS_PC.md)**
+  - Node.js が使えない PC 向け。PowerShell で Supabase Management API を呼び出して SQL を実行する手順
+
 ### デプロイ・セットアップガイド
 
 - **[deployment/06_vercel_deployment_guide.md](./deployment/06_vercel_deployment_guide.md)**
