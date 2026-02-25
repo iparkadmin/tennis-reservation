@@ -52,6 +52,14 @@ export type Court = {
   is_active: boolean
 }
 
+export type Utilizer = {
+  id: string
+  user_id: string
+  full_name: string
+  created_at: string
+  updated_at: string
+}
+
 // データベース関数（必要に応じて他のファイルからインポートされる）
 export async function getProfile(userId: string): Promise<Profile | null> {
   if (!isSupabaseConfigured) return null
@@ -190,6 +198,101 @@ export async function getReservationsByDate(
     created_at: r.created_at,
     court: undefined, // カレンダー表示では不要
   })) as Reservation[]
+}
+
+export async function getUtilizers(userId: string): Promise<Utilizer[]> {
+  if (!isSupabaseConfigured) return []
+  const { data, error } = await supabase
+    .from('utilizers')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at')
+  if (error) {
+    console.error('Error fetching utilizers:', error)
+    return []
+  }
+  return data || []
+}
+
+export async function createUtilizer(
+  userId: string,
+  fullName: string
+): Promise<Utilizer | null> {
+  if (!isSupabaseConfigured) return null
+  const { data, error } = await supabase
+    .from('utilizers')
+    .insert({
+      user_id: userId,
+      full_name: fullName.trim(),
+    })
+    .select()
+    .single()
+  if (error) {
+    console.error('Error creating utilizer:', error)
+    throw new Error(error.message || '利用者の追加に失敗しました')
+  }
+  return data
+}
+
+export async function updateUtilizer(
+  utilizerId: string,
+  userId: string,
+  updates: { full_name: string }
+): Promise<boolean> {
+  if (!isSupabaseConfigured) return false
+  const { error } = await supabase
+    .from('utilizers')
+    .update({ full_name: updates.full_name.trim() })
+    .eq('id', utilizerId)
+    .eq('user_id', userId)
+  if (error) {
+    console.error('Error updating utilizer:', error)
+    return false
+  }
+  return true
+}
+
+/** 予約確定時に利用者一覧を保存（新規追加・更新・削除を同期） */
+export async function saveUtilizers(
+  userId: string,
+  utilizers: { id?: string; full_name: string }[]
+): Promise<void> {
+  if (!isSupabaseConfigured) return
+  const existing = await getUtilizers(userId)
+  const existingIds = new Set(existing.map((u) => u.id))
+  const formIds = new Set(utilizers.filter((u) => u.id).map((u) => u.id!))
+
+  for (const u of utilizers) {
+    const name = u.full_name?.trim()
+    if (!name) continue
+    if (u.id && existingIds.has(u.id)) {
+      const orig = existing.find((x) => x.id === u.id)
+      if (orig && orig.full_name !== name) {
+        await updateUtilizer(u.id, userId, { full_name: name })
+      }
+    } else if (!u.id) {
+      await createUtilizer(userId, name)
+    }
+  }
+  for (const id of existingIds) {
+    if (!formIds.has(id)) {
+      await deleteUtilizer(id, userId)
+    }
+  }
+}
+
+export async function deleteUtilizer(utilizerId: string, userId: string): Promise<boolean> {
+  if (!isSupabaseConfigured) return false
+  const { error } = await supabase
+    .from('utilizers')
+    .delete()
+    .eq('id', utilizerId)
+    .eq('user_id', userId)
+  if (error) {
+    console.error('Error deleting utilizer:', error)
+    return false
+  }
+  return true
 }
 
 export async function createReservation(

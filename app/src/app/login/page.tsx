@@ -2,6 +2,10 @@
 
 import AuthForm from "@/components/AuthForm";
 import Header from "@/components/Header";
+import {
+  validatePassword,
+  PASSWORD_REQUIREMENTS_LABEL,
+} from "@/lib/passwordValidation";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -99,8 +103,13 @@ export default function LoginPage() {
     const form = e.currentTarget;
     const password = (form.elements.namedItem("newPassword") as HTMLInputElement)?.value;
     const confirm = (form.elements.namedItem("confirmPassword") as HTMLInputElement)?.value;
-    if (!password || password.length < 6) {
-      setSetPasswordError("パスワードは6文字以上で入力してください。");
+    if (!password) {
+      setSetPasswordError("パスワードを入力してください。");
+      return;
+    }
+    const passwordResult = validatePassword(password);
+    if (!passwordResult.valid) {
+      setSetPasswordError(passwordResult.errors.join(" "));
       return;
     }
     if (password !== confirm) {
@@ -132,11 +141,12 @@ export default function LoginPage() {
               <form onSubmit={handleSetPassword} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-on-background mb-2">新しいパスワード</label>
-                  <input type="password" name="newPassword" className="input" placeholder="••••••••" required minLength={6} autoComplete="new-password" />
+                  <p className="text-xs text-on-background/70 mb-1.5">{PASSWORD_REQUIREMENTS_LABEL}</p>
+                  <input type="password" name="newPassword" className="input" placeholder="••••••••" required minLength={8} autoComplete="new-password" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-on-background mb-2">パスワード（確認）</label>
-                  <input type="password" name="confirmPassword" className="input" placeholder="••••••••" required minLength={6} autoComplete="new-password" />
+                  <input type="password" name="confirmPassword" className="input" placeholder="••••••••" required minLength={8} autoComplete="new-password" />
                 </div>
                 {setPasswordError && (
                   <div className="bg-highlight/10 border border-highlight text-highlight px-4 py-3 rounded-lg text-sm">{setPasswordError}</div>

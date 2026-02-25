@@ -51,11 +51,14 @@ FROM auth.users u
 JOIN profiles p ON p.id = u.id
 ORDER BY u.created_at DESC;
 
--- auth.users にいるが profiles にいない（要: create_missing_profiles 等）
--- SELECT u.id, u.email, u.created_at
--- FROM auth.users u
--- LEFT JOIN profiles p ON p.id = u.id
--- WHERE p.id IS NULL;
+-- auth.users にいるが profiles にいない（削除漏れ・再登録不可の原因）
+-- 該当ユーザーは Authentication > Users から手動削除すること
+-- 詳細: docs/app/25_deleted_user_re-registration_troubleshooting.md
+SELECT u.id, u.email, u.created_at
+FROM auth.users u
+LEFT JOIN profiles p ON p.id = u.id
+WHERE p.id IS NULL
+ORDER BY u.created_at DESC;
 
 
 -- ===========================================

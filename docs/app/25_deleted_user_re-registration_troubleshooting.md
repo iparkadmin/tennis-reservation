@@ -1,0 +1,83 @@
+# 削除済みユーザーの再登録トラブルシューティング
+
+## 症状
+
+- ユーザー情報をSupabaseから削除した後、**同じメールアドレスで新規登録**しようとすると「すでに登録済です」と表示される
+- **パスワードをリセット**しようとすると「このメールアドレスは登録されていません。新規登録を行ってください。」と表示される
+- どちらのルートでも解決できず、同じメールアドレスで再登録できない
+
+---
+
+## 原因
+
+Supabaseには**2つの別々のデータソース**があります：
+
+| テーブル | 役割 | 削除方法 |
+|---------|------|----------|
+| `auth.users` | Supabase Auth が管理する認証情報（メール・パスワード） | ダッシュボードまたは Admin API |
+| `profiles` | アプリケーションのユーザー情報（名前など） | SQL で直接削除可能 |
+
+**よくある状況**：`profiles` テーブルや `reservations` テーブルのみを削除し、**`auth.users` は残ったまま**になっている。
+
+- **新規登録**：`auth.users` に既にメールが存在するため「すでに登録済」となる
+- **パスワードリセット**：アプリは `profiles` の存在をチェックしており、存在しないため「登録されていません」となる
+
+→ 結果として、どちらのルートでも解決できない状態になる。
+
+---
+
+## 解決方法
+
+### 方法1: Supabase ダッシュボードから削除（推奨）
+
+1. **Supabase ダッシュボード**にログイン
+2. 左メニュー **Authentication** → **Users** を開く
+3. 該当するメールアドレスのユーザーを探す
+4. ユーザー行の右端の **⋮**（3点メニュー）をクリック
+5. **Delete user** を選択して削除
+
+これで `auth.users` から完全に削除され、同じメールアドレスで新規登録できるようになります。
+
+---
+
+### 方法2: SQL Editor で削除（管理者向け）
+
+`auth.users` は Supabase の `auth` スキーマ内にあるため、通常の SQL では直接削除できません。代わりに **Supabase の Admin API** を使用するか、**ダッシュボード**から削除してください。
+
+SQL で確認したい場合は、以下で「auth.users にいるが profiles にいない」ユーザーを確認できます：
+
+```sql
+-- auth.users にいるが profiles にいない（削除漏れのユーザー）
+SELECT u.id, u.email, u.created_at
+FROM auth.users u
+LEFT JOIN profiles p ON p.id = u.id
+WHERE p.id IS NULL
+ORDER BY u.created_at DESC;
+```
+
+該当ユーザーがいる場合、**ダッシュボードの Authentication → Users** から手動で削除してください。
+
+---
+
+### 方法3: アプリのアカウント削除機能を使う（今後）
+
+ユーザーがアプリ内の「アカウント削除」機能を使う場合、**`SUPABASE_SERVICE_ROLE_KEY`** が Vercel の環境変数に設定されていれば、`auth.users` を含めて完全に削除されます。
+
+設定されていない場合、`profiles` と `reservations` のみ削除され、`auth.users` は残ります。その場合は上記の方法1で手動削除が必要です。
+
+→ 詳細は `docs/app/20_service_role_key_setup.md` を参照。
+
+---
+
+## 予防策
+
+1. **ユーザー削除時**：`SUPABASE_SERVICE_ROLE_KEY` を設定し、アプリのアカウント削除機能で `auth.users` まで削除する
+2. **管理者が手動で削除する場合**：`profiles` や `reservations` だけでなく、**Authentication → Users** から該当ユーザーも削除する
+3. **一括削除する場合**：`profiles` を削除する前に、`auth.users` の該当ユーザーをダッシュボードから削除する
+
+---
+
+## 関連ドキュメント
+
+- `docs/app/20_service_role_key_setup.md` - サービスロールキー設定（アカウント完全削除に必要）
+- `database/scripts/19_admin_queries.sql` - auth.users と profiles の突き合わせクエリ

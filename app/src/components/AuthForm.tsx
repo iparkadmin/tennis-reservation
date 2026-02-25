@@ -5,6 +5,10 @@ import { supabase } from "@/lib/supabase";
 import { LogIn, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { EMAIL_IPARK_PORTAL_NOTICE } from "@/lib/constants";
+import {
+  validatePassword,
+  PASSWORD_REQUIREMENTS_LABEL,
+} from "@/lib/passwordValidation";
 
 type AuthMode = "login" | "signup";
 
@@ -35,6 +39,12 @@ export default function AuthForm() {
       if (mode === "signup") {
         if (!privacyAccepted) {
           setError("プライバシーポリシーへの同意が必要です");
+          setLoading(false);
+          return;
+        }
+        const passwordResult = validatePassword(password);
+        if (!passwordResult.valid) {
+          setError(passwordResult.errors.join(" "));
           setLoading(false);
           return;
         }
@@ -445,6 +455,11 @@ export default function AuthForm() {
             <label className="block text-sm font-medium text-on-background mb-2">
               パスワード
             </label>
+            {mode === "signup" && (
+              <p className="text-xs text-on-background/70 mb-1.5">
+                {PASSWORD_REQUIREMENTS_LABEL}
+              </p>
+            )}
             <input
               type="password"
               value={password}
@@ -454,7 +469,8 @@ export default function AuthForm() {
               className="input"
               placeholder="••••••••"
               required
-              minLength={6}
+              minLength={8}
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
             />
             {mode === "login" && (
               <p className="mt-1.5 text-right">

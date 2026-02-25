@@ -187,9 +187,15 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ===========================================
 -- 7. 公開用 VIEW（空き状況・個人情報なし）
 -- ===========================================
-CREATE OR REPLACE VIEW public_availability AS
-SELECT id, court_id, booking_date, start_time, end_time, created_at
-FROM reservations;
+-- Security Advisor 0010 対策: VIEW は SECURITY INVOKER、データ取得は関数に委譲
+CREATE OR REPLACE FUNCTION get_public_availability()
+RETURNS TABLE (id uuid, court_id uuid, booking_date date, start_time time, end_time time, created_at timestamptz)
+LANGUAGE sql SECURITY DEFINER SET search_path = public STABLE AS $$
+  SELECT id, court_id, booking_date, start_time, end_time, created_at FROM reservations;
+$$;
+
+CREATE OR REPLACE VIEW public_availability WITH (security_invoker = on) AS
+SELECT * FROM get_public_availability();
 
 GRANT SELECT ON public_availability TO anon, authenticated;
 

@@ -3,9 +3,16 @@
 import { useEffect, useState, useCallback } from "react";
 import { addDays, startOfWeek, format, parseISO, isSameDay } from "date-fns";
 import { ja } from "date-fns/locale/ja";
-import { getCourts, type Court, getReservationsByDate, createReservation } from "@/lib/supabase";
+import {
+  getCourts,
+  type Court,
+  getReservationsByDate,
+  createReservation,
+  getUtilizers,
+  saveUtilizers,
+} from "@/lib/supabase";
 import { isBookableDate, generateTimeSlots, formatDate } from "@/lib/dateUtils";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, UserPlus, X } from "lucide-react";
 
 interface BookingCalendarProps {
   userId?: string;
@@ -38,8 +45,25 @@ export default function BookingCalendar({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [utilizers, setUtilizers] = useState<{ id?: string; full_name: string }[]>([]);
 
   const timeSlots = generateTimeSlots();
+
+  // スロット選択時に利用者を読み込み（過去登録があればデフォルト表示）
+  useEffect(() => {
+    if (userId && selectedSlots.length > 0) {
+      getUtilizers(userId).then((data) => {
+        setUtilizers((prev) => {
+          if (prev.length > 0) return prev;
+          return data.length > 0
+            ? data.map((u) => ({ id: u.id, full_name: u.full_name }))
+            : [{ full_name: "" }];
+        });
+      });
+    } else if (selectedSlots.length === 0) {
+      setUtilizers([]);
+    }
+  }, [userId, selectedSlots.length]);
 
   // コート一覧を読み込む
   useEffect(() => {
@@ -185,6 +209,9 @@ export default function BookingCalendar({
       setSaving(true);
       setError(null);
 
+      const toSave = utilizers.filter((u) => u.full_name.trim());
+      await saveUtilizers(userId, toSave);
+
       for (const slot of selectedSlots) {
         await createReservation(
           userId,
@@ -195,11 +222,9 @@ export default function BookingCalendar({
         );
       }
 
-      // 予約データを再読み込み
       await loadReservations();
       setSelectedSlots([]);
-      
-      // ページをリロードして予約一覧を更新
+      setUtilizers([]);
       window.location.reload();
     } catch (error: any) {
       setError(error.message || "予約の作成に失敗しました");
@@ -207,6 +232,16 @@ export default function BookingCalendar({
       setSaving(false);
     }
   };
+
+  const addUtilizer = () => setUtilizers((prev) => [...prev, { full_name: "" }]);
+  const updateUtilizer = (index: number, full_name: string) =>
+    setUtilizers((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], full_name };
+      return next;
+    });
+  const removeUtilizer = (index: number) =>
+    setUtilizers((prev) => prev.filter((_, i) => i !== index));
 
   // 週の日付リスト
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -356,7 +391,7 @@ export default function BookingCalendar({
         </div>
       )}
 
-      {/* 予約確定ボタン（通常モードのみ） */}
+      {/* 予約確定（通常モードのみ） */}
       {!selectionMode && selectedSlots.length > 0 && (
         <div className="card">
           <div className="mb-4">
@@ -385,6 +420,45 @@ export default function BookingCalendar({
               })}
             </div>
           </div>
+
+          <div className="mb-4">
+            <h3 className="text-sm font-medium text-on-background mb-2">
+              利用者（登録ユーザー以外でコートを利用する方の氏名）
+            </h3>
+            <p className="text-xs text-on-background/60 mb-2">
+              過去に登録した利用者がいればデフォルトで表示されます。編集・追加・削除できます。
+            </p>
+            <div className="space-y-2">
+              {utilizers.map((u, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={u.full_name}
+                    onChange={(e) => updateUtilizer(i, e.target.value)}
+                    className="input flex-1"
+                    placeholder="氏名"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeUtilizer(i)}
+                    className="p-2 text-highlight hover:bg-highlight/10 rounded-lg"
+                    title="削除"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={addUtilizer}
+              className="mt-2 text-sm text-primary-accent hover:underline flex items-center gap-1"
+            >
+              <UserPlus className="w-4 h-4" />
+              利用者を追加
+            </button>
+          </div>
+
           <button
             onClick={handleConfirm}
             disabled={saving || !userId}
