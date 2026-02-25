@@ -144,7 +144,7 @@
 
 ## 🔗 関連ドキュメント
 
-- **メールテンプレート設定**: `docs/app/21_supabase_email_template_setup.md`
+- **メールテンプレート設定**: `docs/app/11_supabase_email_template_setup.md`、トラブルシューティング: `docs/app/22_supabase_email_template_troubleshooting.md`
 - **トラブルシューティング**: `docs/app/22_supabase_email_template_troubleshooting.md`
 - **カスタムSMTP設定**: `docs/deployment/12_supabase_custom_smtp_setup.md`
 - **Resend SMTP設定**: `docs/deployment/14_resend_smtp_setup_guide.md`

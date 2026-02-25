@@ -39,9 +39,6 @@
 - **[app/20_service_role_key_setup.md](./app/20_service_role_key_setup.md)**
   - Supabase service_role キーの設定ガイド
 
-- **[app/21_supabase_email_template_setup.md](./app/21_supabase_email_template_setup.md)**
-  - Supabase メールテンプレート設定ガイド（詳細版）
-
 - **[app/22_supabase_email_template_troubleshooting.md](./app/22_supabase_email_template_troubleshooting.md)**
   - メールテンプレートのトラブルシューティング
 

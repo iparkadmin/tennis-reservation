@@ -22,7 +22,6 @@ tennis-reservation/
 │   │   ├── 11_supabase_email_template_setup.md
 │   │   ├── 18_rate_limiting_guide.md
 │   │   ├── 20_service_role_key_setup.md
-│   │   ├── 21_supabase_email_template_setup.md
 │   │   ├── 22_supabase_email_template_troubleshooting.md
 │   │   ├── 23_supabase_email_change_template_setup.md
 │   │   ├── SECURITY_AUDIT_REPORT.md
