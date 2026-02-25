@@ -101,13 +101,14 @@
 
 **症状**: メール内のパスワードリセットリンクをクリックすると、パスワード設定画面ではなくトップ画面（/）に遷移する
 
-**原因**: Supabase の Site URL が `/` に設定されている、または Redirect URLs の設定により `/login` ではなくトップにリダイレクトされている
+**原因**: Supabase の Site URL が `/` に設定されている、または Redirect URLs に `/login` が含まれていない
 
 **修正手順**:
 
 1. **Supabase** → **Authentication** → **URL Configuration**
-2. **Redirect URLs** に `https://あなたのドメイン.vercel.app/login` を追加
-3. アプリ側でトップ（/）に `type=recovery` 等のハッシュで来た場合、`/login` へリダイレクトする処理を追加済み（フォールバック対応）
+2. **Redirect URLs** に `https://あなたのドメイン.vercel.app/login` を**必ず追加**（ワイルドカード `/**` のみでは `/login` にマッチしない場合あり）
+3. **Site URL** を `https://あなたのドメイン.vercel.app` に設定（末尾スラッシュなし）
+4. アプリ側フォールバック: トップ（/）に `type=recovery` 等のハッシュで来た場合、`/login` へ自動リダイレクト（`window.location.replace` で hash を保持）
 
 ### 問題7: 「Email rate limit exceeded」と表示される
 
