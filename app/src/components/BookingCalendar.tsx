@@ -11,6 +11,7 @@ import {
   getUtilizers,
   saveUtilizers,
 } from "@/lib/supabase";
+import { UTILIZERS_LABEL, UTILIZERS_DESCRIPTION } from "@/lib/constants";
 import { isBookableDate, generateTimeSlots, formatDate } from "@/lib/dateUtils";
 import { Calendar, Clock, UserPlus, X } from "lucide-react";
 
@@ -427,10 +428,10 @@ export default function BookingCalendar({
 
           <div className="mb-4">
             <h3 className="text-sm font-medium text-on-background mb-2">
-              利用者（登録ユーザー以外でコートを利用する方の氏名）
+              {UTILIZERS_LABEL}
             </h3>
             <p className="text-xs text-on-background/60 mb-2">
-              過去に登録した利用者がいればデフォルトで表示されます。編集・追加・削除できます。
+              {UTILIZERS_DESCRIPTION}
             </p>
             <div className="space-y-2">
               {utilizers.map((u, i) => (

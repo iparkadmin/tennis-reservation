@@ -11,3 +11,8 @@ export const NOTICE_ITEMS = [
 /** メールアドレス入力の注意（ログイン・新規登録・パスワードリセット） */
 export const EMAIL_IPARK_PORTAL_NOTICE =
   "メールアドレスはアイパークポータルでご利用のメールアドレスをご入力ください。";
+
+/** 予約時の利用者入力（来館申請と一致させる旨） */
+export const UTILIZERS_LABEL = "利用者（当日参加される方の氏名）";
+export const UTILIZERS_DESCRIPTION =
+  "来館申請と同じ氏名でご入力ください。過去に登録した利用者がいればデフォルトで表示されます。編集・追加・削除できます。";
