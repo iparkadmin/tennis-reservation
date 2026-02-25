@@ -183,7 +183,7 @@ export default function AuthForm() {
           throw signInError;
         }
 
-        // ログイン成功後、プロフィールの存在確認
+        // ログイン成功後、プロフィールの存在確認（なければ自動作成）
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
@@ -193,13 +193,22 @@ export default function AuthForm() {
               .eq("id", user.id)
               .single();
 
-            // プロフィールが存在しない場合（削除済みユーザー）
+            // プロフィールが存在しない場合（auth.users にいるが profiles にいない状態）
+            // → プロフィールを自動作成してログインを継続
             if (profileError || !profileData) {
-              // ログアウト
-              await supabase.auth.signOut();
-              setError("このアカウントは登録が完了していません。新規登録を行ってください。");
-              setLoading(false);
-              return;
+              const { error: insertError } = await supabase.from("profiles").insert({
+                id: user.id,
+                full_name: user.user_metadata?.full_name || "",
+                full_name_kana: user.user_metadata?.full_name_kana || "",
+                email: user.email || "",
+              });
+              if (insertError) {
+                console.error("プロフィール自動作成エラー:", insertError);
+                await supabase.auth.signOut();
+                setError("アカウントの復元に失敗しました。管理者にお問い合わせください。");
+                setLoading(false);
+                return;
+              }
             }
           }
         } catch (err) {
