@@ -222,12 +222,16 @@ export default function BookingCalendar({
         );
       }
 
-      await loadReservations();
       setSelectedSlots([]);
       setUtilizers([]);
-      window.location.reload();
+      await loadReservations();
     } catch (error: any) {
-      setError(error.message || "予約の作成に失敗しました");
+      const msg = error.message || "予約の作成に失敗しました";
+      setError(msg);
+      // 重複エラー時は予約一覧を再取得して正しい予約済み状態を表示
+      if (/duplicate|unique|already exists|重複/i.test(msg)) {
+        loadReservations();
+      }
     } finally {
       setSaving(false);
     }
@@ -368,7 +372,7 @@ export default function BookingCalendar({
                           onClick={() =>
                             toggleSlot(dateStr, start, end, selectedCourtId)
                           }
-                          disabled={!isBookable || isReserved || !selectedCourtId}
+                          disabled={!isBookable || isReserved || !selectedCourtId || saving}
                           className={`px-2 py-3 rounded-lg text-sm font-medium transition-colors ${
                             isReserved
                               ? "bg-outline/20 text-on-background/40 cursor-not-allowed"

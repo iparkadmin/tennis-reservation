@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { formatTime } from './dateUtils'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -187,14 +188,15 @@ export async function getReservationsByDate(
   }
   
   // public_availability VIEW のデータを Reservation 型に合わせて変換
+  // start_time/end_time は DB が "09:00:00" 形式で返すため "HH:mm" に正規化
   // court 情報はカレンダー表示では不要（既に selectedCourtId でフィルタリング済み）
   return (data || []).map((r: any) => ({
     id: r.id,
     user_id: '', // public_availability には user_id が含まれない
     court_id: r.court_id,
     booking_date: r.booking_date,
-    start_time: r.start_time,
-    end_time: r.end_time,
+    start_time: formatTime(String(r.start_time ?? '')),
+    end_time: formatTime(String(r.end_time ?? '')),
     created_at: r.created_at,
     court: undefined, // カレンダー表示では不要
   })) as Reservation[]
