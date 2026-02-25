@@ -109,6 +109,17 @@
 2. **Redirect URLs** に `https://あなたのドメイン.vercel.app/login` を追加
 3. アプリ側でトップ（/）に `type=recovery` 等のハッシュで来た場合、`/login` へリダイレクトする処理を追加済み（フォールバック対応）
 
+### 問題7: 「Email rate limit exceeded」と表示される
+
+**症状**: 認証メール再送信やパスワードリセットを何度か試すと「Email rate limit exceeded」と表示される
+
+**原因**: Supabase のメール送信レート制限に達した。**Supabase 組み込み SMTP（無料）は 1時間あたり2通**の制限があり、変更不可。
+
+**対処**:
+- **ユーザー**: **1時間**待ってから再度お試しください。アプリでは「送信回数が多すぎます。しばらく（1時間）待ってから再度お試しください。」と表示されます
+- **管理者（制限を変更したい場合）**: **カスタム SMTP を設定する必要がある**。Resend・SMTP2GO 等を設定すると、**Authentication → Rate Limits** でメール送信制限を変更可能になる。組み込み SMTP のままでは変更不可
+  - 設定手順: `docs/deployment/12_supabase_custom_smtp_setup.md`（推奨: Resend）
+
 ---
 
 ## 正しいメールテンプレートの例

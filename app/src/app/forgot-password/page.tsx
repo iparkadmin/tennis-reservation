@@ -35,7 +35,11 @@ function ForgotPasswordForm() {
       if (err) throw err;
       setSent(true);
     } catch (err: any) {
-      setError(err.message || "送信に失敗しました");
+      let errorMessage = err?.message || "送信に失敗しました";
+      if (/rate.*limit|too many requests|email rate limit exceeded/i.test(errorMessage)) {
+        errorMessage = "送信回数が多すぎます。1時間待ってから再度お試しください。";
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

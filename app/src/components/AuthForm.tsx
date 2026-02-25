@@ -105,6 +105,8 @@ export default function AuthForm() {
             errorMessage = "メールサーバーの設定に問題があります。管理者にお問い合わせください。";
           } else if (/template|Template/i.test(errorMessage)) {
             errorMessage = "メールテンプレートの設定に問題があります。Supabaseの設定を確認してください。";
+          } else if (/rate.*limit|too many requests|email rate limit exceeded/i.test(errorMessage)) {
+            errorMessage = "送信回数が多すぎます。1時間待ってから再度お試しください。";
           }
           throw new Error(errorMessage);
         }
@@ -255,6 +257,8 @@ export default function AuthForm() {
         errorMessage = "メールサーバーの設定に問題があります。管理者にお問い合わせください。";
       } else if (/template|Template/i.test(errorMessage)) {
         errorMessage = "メールテンプレートの設定に問題があります。Supabaseの設定を確認してください。";
+      } else if (/rate.*limit|too many requests|email rate limit exceeded/i.test(errorMessage)) {
+        errorMessage = "送信回数が多すぎます。1時間待ってから再度お試しください。";
       } else if (/invalid.*credentials|invalid.*login/i.test(errorMessage)) {
         errorMessage = "メールアドレスまたはパスワードが正しくありません。";
       }
@@ -319,8 +323,8 @@ export default function AuthForm() {
         errorMessage = "認証メールの送信に失敗しました。Supabaseのメール設定を確認してください。";
       } else if (/email.*not.*found|Email not found/i.test(errorMessage)) {
         errorMessage = "このメールアドレスは登録されていません。新規登録を行ってください。";
-      } else if (/rate.*limit|too many requests/i.test(errorMessage)) {
-        errorMessage = "送信回数が多すぎます。しばらく待ってから再度お試しください。";
+      } else if (/rate.*limit|too many requests|email rate limit exceeded/i.test(errorMessage)) {
+        errorMessage = "送信回数が多すぎます。1時間待ってから再度お試しください。";
       } else if (/email.*disabled|Email disabled/i.test(errorMessage)) {
         errorMessage = "メール送信機能が無効になっています。管理者にお問い合わせください。";
       } else if (/smtp|SMTP/i.test(errorMessage)) {
