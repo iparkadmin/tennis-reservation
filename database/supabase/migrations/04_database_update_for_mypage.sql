@@ -8,8 +8,7 @@
 -- 1. profilesテーブルにカラムを追加
 -- ===========================================
 ALTER TABLE profiles 
-ADD COLUMN IF NOT EXISTS full_name_kana TEXT,
-ADD COLUMN IF NOT EXISTS phone TEXT;
+ADD COLUMN IF NOT EXISTS full_name_kana TEXT;
 
 -- ===========================================
 -- 2. reservationsテーブルにカラムを追加
@@ -28,7 +27,7 @@ ALTER TABLE reservations
 ALTER COLUMN reservation_number SET DEFAULT substring(md5(random()::text || gen_random_uuid()::text || clock_timestamp()::text) from 1 for 10);
 
 -- ===========================================
--- 3. トリガー関数を更新（full_name_kanaとphoneを追加）
+-- 3. トリガー関数を更新（full_name_kanaを追加、電話番号は廃止）
 -- ===========================================
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -39,13 +38,12 @@ BEGIN
   END IF;
 
   -- profileを作成
-  INSERT INTO public.profiles (id, full_name, full_name_kana, email, phone)
+  INSERT INTO public.profiles (id, full_name, full_name_kana, email)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
     COALESCE(NEW.raw_user_meta_data->>'full_name_kana', ''),
-    COALESCE(NEW.email, ''),
-    COALESCE(NEW.raw_user_meta_data->>'phone', '')
+    COALESCE(NEW.email, '')
   )
   ON CONFLICT (id) DO NOTHING;
   
@@ -72,13 +70,12 @@ DECLARE
   v_error TEXT;
 BEGIN
   BEGIN
-    INSERT INTO public.profiles (id, full_name, full_name_kana, email, phone)
+    INSERT INTO public.profiles (id, full_name, full_name_kana, email)
     SELECT 
       u.id,
       COALESCE(u.raw_user_meta_data->>'full_name', ''),
       COALESCE(u.raw_user_meta_data->>'full_name_kana', ''),
-      COALESCE(u.email, ''),
-      COALESCE(u.raw_user_meta_data->>'phone', '')
+      COALESCE(u.email, '')
     FROM auth.users u
     LEFT JOIN public.profiles p ON u.id = p.id
     WHERE p.id IS NULL

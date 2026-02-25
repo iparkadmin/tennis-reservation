@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { LogIn, UserPlus } from "lucide-react";
+import { LogIn, UserPlus, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { EMAIL_IPARK_PORTAL_NOTICE } from "@/lib/constants";
 import {
@@ -27,6 +27,7 @@ export default function AuthForm() {
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [emailNotConfirmed, setEmailNotConfirmed] = useState<string | null>(null);
   const [resendingConfirmation, setResendingConfirmation] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,46 +149,37 @@ export default function AuthForm() {
           password,
         });
 
-        // ログイン失敗時、削除済みユーザーまたはメール未認証の可能性をチェック
+        // ログイン失敗時の処理
         if (signInError) {
-          // メールアドレスでprofilesテーブルを検索（先に確認）
-          let profileExists = false;
-          try {
-            const { data: profileData } = await supabase
-              .from("profiles")
-              .select("id")
-              .eq("email", email)
-              .single();
-            profileExists = !!profileData;
-          } catch (err) {
-            // プロフィールが存在しない場合も続行
-            console.error("プロフィール確認エラー:", err);
+          // パスワード誤り（Invalid login credentials）の場合は即エラー表示
+          // ※profilesのRLSにより未ログイン時は検索不可のため、プロフィール確認は行わない
+          if (signInError.message && /invalid.*credentials|invalid.*login/i.test(signInError.message)) {
+            setError("メールアドレスまたはパスワードが正しくありません。");
+            setLoading(false);
+            return;
           }
 
-          // メール未認証エラーのチェック
+          // メール未認証エラーのみプロフィール確認（RLSで検索不可の場合はスキップ）
           if (signInError.message && /email.*not.*confirm|Email not confirmed/i.test(signInError.message)) {
-            if (profileExists) {
-              // プロフィールが存在する場合、メール未認証の可能性が高い
-              setEmailNotConfirmed(email);
-              setError(null);
-              setMessage(null);
-              setLoading(false);
-              return;
+            try {
+              const { data: profileData } = await supabase
+                .from("profiles")
+                .select("id")
+                .eq("email", email)
+                .single();
+              if (profileData) {
+                setEmailNotConfirmed(email);
+                setError(null);
+                setMessage(null);
+                setLoading(false);
+                return;
+              }
+            } catch (err) {
+              console.error("プロフィール確認エラー:", err);
             }
           }
 
-          // profilesに存在しない場合、削除済みユーザーの可能性
-          if (!profileExists) {
-            // auth.usersに存在するか確認（Admin APIは使えないので、別の方法で確認）
-            // ログインエラーが「Invalid login credentials」の場合、auth.usersに存在する可能性がある
-            if (signInError.message && /invalid.*credentials/i.test(signInError.message)) {
-              setError("このアカウントは登録が完了していません。新規登録を行ってください。");
-              setLoading(false);
-              return;
-            }
-          }
-          
-          // 通常のログインエラー
+          // その他のログインエラー
           throw signInError;
         }
 
@@ -254,6 +246,8 @@ export default function AuthForm() {
         errorMessage = "メールサーバーの設定に問題があります。管理者にお問い合わせください。";
       } else if (/template|Template/i.test(errorMessage)) {
         errorMessage = "メールテンプレートの設定に問題があります。Supabaseの設定を確認してください。";
+      } else if (/invalid.*credentials|invalid.*login/i.test(errorMessage)) {
+        errorMessage = "メールアドレスまたはパスワードが正しくありません。";
       }
       setError(errorMessage);
     } finally {
@@ -345,6 +339,7 @@ export default function AuthForm() {
               setEmailNotConfirmed(null);
               setFullName("山田 太郎");
               setFullNameKana("ヤマダ タロウ");
+              setShowPassword(false);
             }}
             className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
               mode === "login"
@@ -365,6 +360,7 @@ export default function AuthForm() {
               setFullName("山田 太郎");
               setFullNameKana("ヤマダ タロウ");
               setPrivacyAccepted(false);
+              setShowPassword(false);
             }}
             className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
               mode === "signup"
@@ -480,18 +476,33 @@ export default function AuthForm() {
                 </ul>
               </>
             )}
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onFocus={() => setFocusedField("password")}
-              onBlur={() => setFocusedField(null)}
-              className="input"
-              placeholder="••••••••"
-              required
-              minLength={8}
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => setFocusedField("password")}
+                onBlur={() => setFocusedField(null)}
+                className="input pr-10"
+                placeholder="••••••••"
+                required
+                minLength={8}
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-on-background/60 hover:text-on-background rounded"
+                title={showPassword ? "パスワードを隠す" : "パスワードを表示"}
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
             {mode === "login" && (
               <p className="mt-1.5 text-right">
                 <Link

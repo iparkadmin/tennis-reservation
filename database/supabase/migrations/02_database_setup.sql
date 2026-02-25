@@ -12,7 +12,6 @@ CREATE TABLE IF NOT EXISTS profiles (
   full_name TEXT,
   full_name_kana TEXT,
   email TEXT,
-  phone TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -37,14 +36,13 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- profileを作成
-  INSERT INTO public.profiles (id, full_name, full_name_kana, email, phone)
+  -- profileを作成（電話番号は廃止）
+  INSERT INTO public.profiles (id, full_name, full_name_kana, email)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
     COALESCE(NEW.raw_user_meta_data->>'full_name_kana', ''),
-    COALESCE(NEW.email, ''),
-    COALESCE(NEW.raw_user_meta_data->>'phone', '')
+    COALESCE(NEW.email, '')
   )
   ON CONFLICT (id) DO NOTHING;
   
@@ -164,13 +162,12 @@ DECLARE
   v_error TEXT;
 BEGIN
   BEGIN
-    INSERT INTO public.profiles (id, full_name, full_name_kana, email, phone)
+    INSERT INTO public.profiles (id, full_name, full_name_kana, email)
     SELECT 
       u.id,
       COALESCE(u.raw_user_meta_data->>'full_name', ''),
       COALESCE(u.raw_user_meta_data->>'full_name_kana', ''),
-      COALESCE(u.email, ''),
-      COALESCE(u.raw_user_meta_data->>'phone', '')
+      COALESCE(u.email, '')
     FROM auth.users u
     LEFT JOIN public.profiles p ON u.id = p.id
     WHERE p.id IS NULL

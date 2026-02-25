@@ -71,6 +71,32 @@
 3. 「Enable custom SMTP」を使用している場合、SMTP設定が正しいか確認
 4. スパムフォルダを確認
 
+### 問題5: メール認証ボタンで「このページに到達できません」（DNS_PROBE_FINISHED_NXDOMAIN）
+
+**症状**: 新規登録後、メール内の認証ボタンをクリックすると、破損したURL（`xn--app%20redirect%20urls%20url%20%20http` などが含まれる）に遷移し、DNSエラーになる
+
+**原因**: Supabase の **Site URL** が誤って設定されている。ダッシュボードのラベルや説明文が混入している可能性がある。
+
+**修正手順**:
+
+1. **Supabase ダッシュボード** → **Authentication** → **URL Configuration** を開く
+
+2. **Site URL** を確認・修正する
+   - ❌ 誤り例: `tennis-court-reservation-app.vercel.app redirect urls url http://...` など、余分な文字が含まれている
+   - ✅ 正しい例: `https://tennis-court-reservation-app.vercel.app`（プロトコル `https://` 必須、末尾にスラッシュ不要）
+
+3. **Redirect URLs** を確認する
+   - 以下が含まれていること（1行に1つ）:
+     - `https://tennis-court-reservation-app.vercel.app/**`
+     - `https://tennis-court-reservation-app.vercel.app/login`
+   - 余分な文字や改行が入っていないこと
+
+4. **Save** をクリックして保存
+
+5. Vercel の本番URLが異なる場合は、そのURLに置き換える（例: `https://あなたのプロジェクト.vercel.app`）
+
+6. **Vercel の環境変数** `NEXT_PUBLIC_APP_URL` が Supabase の Site URL と一致しているか確認（例: `https://tennis-court-reservation-app.vercel.app`）
+
 ---
 
 ## 正しいメールテンプレートの例
