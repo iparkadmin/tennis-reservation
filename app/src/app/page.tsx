@@ -2,11 +2,27 @@
 
 import { Calendar, Clock, User, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import { NOTICE_ITEMS } from "@/lib/constants";
 
 export default function Home() {
   const router = useRouter();
+
+  // メール内リンク（認証・パスワードリセット）でトップに来た場合、/login へリダイレクト
+  // Supabase の Site URL が / の場合など、/login ではなくトップに飛ぶことがある
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash?.replace("#", "") || "";
+    if (!hash) return;
+    const params = new URLSearchParams(hash);
+    const type = params.get("type");
+    const access_token = params.get("access_token");
+    const refresh_token = params.get("refresh_token");
+    if ((type === "recovery" || type === "signup" || type === "email_change") && access_token && refresh_token) {
+      router.replace(`/login${window.location.search || ""}#${hash}`);
+    }
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-background">

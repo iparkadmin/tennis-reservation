@@ -97,6 +97,18 @@
 
 6. **Vercel の環境変数** `NEXT_PUBLIC_APP_URL` が Supabase の Site URL と一致しているか確認（例: `https://tennis-court-reservation-app.vercel.app`）
 
+### 問題6: パスワードリセットのリンクでトップ画面に飛んでしまう
+
+**症状**: メール内のパスワードリセットリンクをクリックすると、パスワード設定画面ではなくトップ画面（/）に遷移する
+
+**原因**: Supabase の Site URL が `/` に設定されている、または Redirect URLs の設定により `/login` ではなくトップにリダイレクトされている
+
+**修正手順**:
+
+1. **Supabase** → **Authentication** → **URL Configuration**
+2. **Redirect URLs** に `https://あなたのドメイン.vercel.app/login` を追加
+3. アプリ側でトップ（/）に `type=recovery` 等のハッシュで来た場合、`/login` へリダイレクトする処理を追加済み（フォールバック対応）
+
 ---
 
 ## 正しいメールテンプレートの例
