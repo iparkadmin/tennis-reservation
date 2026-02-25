@@ -152,7 +152,7 @@
 
 **対処法**:
 1. Supabaseダッシュボード → Authentication → URL Configuration
-2. Redirect URLsに`/login`を追加
+2. Redirect URLsに`/login`と`/forgot-password`を追加
 
 ---
 

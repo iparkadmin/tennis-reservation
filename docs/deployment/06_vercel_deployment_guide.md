@@ -2,7 +2,7 @@
 
 ## 本番の正しいプロジェクト
 
-- **ドメイン**: `tennis-court-reservation-app.vercel.app`
+- **ドメイン**: `tennis-reservation-one.vercel.app`
 - 類似の別 Vercel プロジェクトは削除し、上記ドメインのプロジェクトのみ運用する。削除は Vercel ダッシュボード → 対象プロジェクト → Settings → Danger Zone → Delete Project。
 
 ---
@@ -123,7 +123,7 @@ Vercelのプロジェクト設定画面で：
 |--------|-----|------|
 | `NEXT_PUBLIC_SUPABASE_URL` | `.env.example` を参照 | Production, Preview, Development |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `.env.example` を参照 | Production, Preview, Development |
-| `NEXT_PUBLIC_APP_URL` | `https://tennis-court-reservation-app.vercel.app` | Production, Preview, Development |
+| `NEXT_PUBLIC_APP_URL` | `https://tennis-reservation-one.vercel.app` | Production, Preview, Development |
 
 **注意**: `NEXT_PUBLIC_APP_URL`は、デプロイ後にVercelが提供するURLに置き換えてください
 
@@ -155,7 +155,7 @@ Vercelのプロジェクト設定画面で：
 ### 6.1 デプロイURLを確認
 
 デプロイ完了後、Vercelが以下のようなURLを提供：
-- `https://tennis-court-reservation-app.vercel.app`（本番ドメイン）
+- `https://tennis-reservation-one.vercel.app`（本番ドメイン）
 
 ### 6.2 動作確認
 
@@ -172,12 +172,14 @@ Vercelのプロジェクト設定画面で：
 
 1. Supabaseダッシュボード → **Authentication** → **URL Configuration**
 2. **Site URL** をVercelの本番URLに設定：
-   - 本番: `https://tennis-court-reservation-app.vercel.app`
+   - 本番: `https://tennis-reservation-one.vercel.app`
    - **「Save changes」** をクリック
 3. **Redirect URLs** に以下を追加：
-   - `https://tennis-court-reservation-app.vercel.app/**`
-   - `https://tennis-court-reservation-app.vercel.app/dashboard`
-   - `https://tennis-court-reservation-app.vercel.app/my-bookings`
+   - `https://tennis-reservation-one.vercel.app/**`
+   - `https://tennis-reservation-one.vercel.app/login`
+   - `https://tennis-reservation-one.vercel.app/forgot-password`
+   - `https://tennis-reservation-one.vercel.app/dashboard`
+   - `https://tennis-reservation-one.vercel.app/my-bookings`
    - **「Save」** をクリック
 
 ### 7.2 メール認証リダイレクトエラーの対処

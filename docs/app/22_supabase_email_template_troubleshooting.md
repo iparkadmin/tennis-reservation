@@ -51,8 +51,9 @@
 1. **SupabaseのRedirect URLs設定**
    - Supabaseダッシュボード → Authentication → URL Configuration
    - Redirect URLsに以下を追加：
-     - `https://tennis-court-reservation-app.vercel.app/login`
-     - `https://tennis-court-reservation-app.vercel.app/**`（ワイルドカード）
+     - `https://tennis-reservation-one.vercel.app/login`
+     - `https://tennis-reservation-one.vercel.app/forgot-password`
+     - `https://tennis-reservation-one.vercel.app/**`（ワイルドカード）
 
 2. **emailRedirectToの設定**
    - `AuthForm.tsx`で`emailRedirectTo`が正しく設定されているか確認
@@ -82,33 +83,36 @@
 1. **Supabase ダッシュボード** → **Authentication** → **URL Configuration** を開く
 
 2. **Site URL** を確認・修正する
-   - ❌ 誤り例: `tennis-court-reservation-app.vercel.app redirect urls url http://...` など、余分な文字が含まれている
-   - ✅ 正しい例: `https://tennis-court-reservation-app.vercel.app`（プロトコル `https://` 必須、末尾にスラッシュ不要）
+   - ❌ 誤り例: `tennis-reservation-one.vercel.app redirect urls url http://...` など、余分な文字が含まれている
+   - ✅ 正しい例: `https://tennis-reservation-one.vercel.app`（プロトコル `https://` 必須、末尾にスラッシュ不要）
 
 3. **Redirect URLs** を確認する
    - 以下が含まれていること（1行に1つ）:
-     - `https://tennis-court-reservation-app.vercel.app/**`
-     - `https://tennis-court-reservation-app.vercel.app/login`
+     - `https://tennis-reservation-one.vercel.app/**`
+     - `https://tennis-reservation-one.vercel.app/login`
+     - `https://tennis-reservation-one.vercel.app/forgot-password`
    - 余分な文字や改行が入っていないこと
 
 4. **Save** をクリックして保存
 
 5. Vercel の本番URLが異なる場合は、そのURLに置き換える（例: `https://あなたのプロジェクト.vercel.app`）
 
-6. **Vercel の環境変数** `NEXT_PUBLIC_APP_URL` が Supabase の Site URL と一致しているか確認（例: `https://tennis-court-reservation-app.vercel.app`）
+6. **Vercel の環境変数** `NEXT_PUBLIC_APP_URL` が Supabase の Site URL と一致しているか確認（例: `https://tennis-reservation-one.vercel.app`）
 
 ### 問題6: パスワードリセットのリンクでトップ画面に飛んでしまう
 
 **症状**: メール内のパスワードリセットリンクをクリックすると、パスワード設定画面ではなくトップ画面（/）に遷移する
 
-**原因**: Supabase の Site URL が `/` に設定されている、または Redirect URLs に `/login` が含まれていない
+**原因**: Supabase の Site URL が `/` に設定されている、または Redirect URLs に `/forgot-password` が含まれていない
 
 **修正手順**:
 
 1. **Supabase** → **Authentication** → **URL Configuration**
-2. **Redirect URLs** に `https://あなたのドメイン.vercel.app/login` を**必ず追加**（ワイルドカード `/**` のみでは `/login` にマッチしない場合あり）
+2. **Redirect URLs** に以下を**必ず追加**（ワイルドカード `/**` のみではマッチしない場合あり）:
+   - `https://あなたのドメイン.vercel.app/login`
+   - `https://あなたのドメイン.vercel.app/forgot-password`
 3. **Site URL** を `https://あなたのドメイン.vercel.app` に設定（末尾スラッシュなし）
-4. アプリ側フォールバック: トップ（/）に `type=recovery` 等のハッシュで来た場合、`/login` へ自動リダイレクト（`window.location.replace` で hash を保持）
+4. アプリ側フォールバック: トップ（/）に `type=recovery` 等のハッシュで来た場合、`/forgot-password` へ自動リダイレクト（`window.location.replace` で hash を保持）
 
 ### 問題7: 「Email rate limit exceeded」と表示される
 
@@ -178,7 +182,7 @@
 
 3. **SupabaseのURL設定を確認**
    - Site URLが正しく設定されているか
-   - Redirect URLsに`/login`が追加されているか
+   - Redirect URLsに`/login`と`/forgot-password`が追加されているか
 
 4. **テストユーザーで新規登録**
    - 送信されたメールを確認

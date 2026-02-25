@@ -41,7 +41,7 @@
 | 項目 | 値 |
 |------|-----|
 | **Key** | `NEXT_PUBLIC_APP_URL` |
-| **Value** | 本番: `https://tennis-court-reservation-app.vercel.app` |
+| **Value** | 本番: `https://tennis-reservation-one.vercel.app` |
 | **Environment** | Production, Preview, Development（すべてチェック） |
 
 **注意**: `NEXT_PUBLIC_APP_URL`は、初回デプロイ後にVercelが提供するURLに更新してください。

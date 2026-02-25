@@ -28,7 +28,7 @@
 
 ### Step 5: Vercelに環境変数として設定
 
-1. **Vercelダッシュボード** → プロジェクト **「tennis-court-reservation-app」** を選択
+1. **Vercelダッシュボード** → プロジェクト **「tennis-reservation-one」** を選択
 2. **「Settings」** タブ → **「Environment Variables」** をクリック
 3. 以下の環境変数を追加：
 

@@ -6,7 +6,12 @@ import { supabase } from "@/lib/supabase";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function Header() {
+type HeaderProps = {
+  /** パスワード設定中など、ナビゲーションを非表示にする場合 true */
+  hideNav?: boolean;
+};
+
+export default function Header({ hideNav = false }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
@@ -66,7 +71,8 @@ export default function Header() {
 
         </div>
 
-        {/* タブナビゲーション（常に表示） */}
+        {/* タブナビゲーション（hideNav 時は非表示：パスワード設定中など） */}
+        {!hideNav && (
         <nav className="flex gap-2 border-b border-white/20 justify-center">
           <button
             onClick={() => router.push("/")}
@@ -108,6 +114,7 @@ export default function Header() {
             </div>
           </button>
         </nav>
+        )}
       </div>
     </header>
   );

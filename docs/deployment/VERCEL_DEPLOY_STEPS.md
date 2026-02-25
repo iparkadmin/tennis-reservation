@@ -71,7 +71,10 @@ git push origin main
 1. **NEXT_PUBLIC_APP_URL** を、Vercel が表示した本番 URL に更新 → **Redeploy**
 2. **Supabase** の **Authentication** → **URL Configuration**:
    - **Site URL**: 上記本番 URL（例: `https://tennis-court-reservation-xxx.vercel.app`）
-   - **Redirect URLs** に `https://あなたのドメイン.vercel.app/**` を追加
+   - **Redirect URLs** に以下を追加:
+     - `https://あなたのドメイン.vercel.app/**`
+     - `https://あなたのドメイン.vercel.app/login`
+     - `https://あなたのドメイン.vercel.app/forgot-password`
 
 ---
 

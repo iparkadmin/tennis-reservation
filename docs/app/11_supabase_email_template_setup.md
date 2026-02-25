@@ -218,7 +218,7 @@ Supabaseのメールテンプレートでは、以下の変数が使用できま
 
 **URLの差し替え：** テンプレート内の `https://tennis-court-reservation.example.com` は、実際のアプリのURLに変更してください。`{{ .SiteURL }}` を使う場合は、`{{ .SiteURL }}/privacy-policy` のように記述できます。
 
-**パスワードリセットのリダイレクト：** アプリでは `resetPasswordForEmail` の `redirectTo` に `/login` を指定しています。Supabase の **Authentication** → **URL Configuration** → **Redirect URLs** に `https://あなたのドメイン/login` が含まれるようにしてください（`/**` で含まれる場合は追加不要です）。
+**パスワードリセットのリダイレクト：** アプリでは `resetPasswordForEmail` の `redirectTo` に `/forgot-password` を指定しています。Supabase の **Authentication** → **URL Configuration** → **Redirect URLs** に `https://あなたのドメイン/forgot-password` が含まれるようにしてください（`/**` で含まれる場合は追加不要です）。
 
 ---
 

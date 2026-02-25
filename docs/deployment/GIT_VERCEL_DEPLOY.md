@@ -74,7 +74,10 @@
 2. **Supabase**  
    - **Authentication** → **URL Configuration**
    - **Site URL**: 上記本番 URL
-   - **Redirect URLs** に `https://あなたのドメイン.vercel.app/**` を追加 → **Save**
+   - **Redirect URLs** に以下を追加 → **Save**:
+     - `https://あなたのドメイン.vercel.app/**`
+     - `https://あなたのドメイン.vercel.app/login`
+     - `https://あなたのドメイン.vercel.app/forgot-password`
 
 ---
 

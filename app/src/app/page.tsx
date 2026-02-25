@@ -20,9 +20,25 @@ export default function Home() {
     const type = params.get("type");
     const access_token = params.get("access_token");
     const refresh_token = params.get("refresh_token");
+    const error_code = params.get("error_code");
+    // 成功時: パスワードリセット（type=recovery）→ /forgot-password へ
+    // メール確認・メール変更（signup, email_change）→ /login へ
     if ((type === "recovery" || type === "signup" || type === "email_change") && access_token && refresh_token) {
-      const path = `/login${window.location.search || ""}#${hash}`;
-      window.location.replace(path);
+      if (type === "recovery") {
+        window.location.replace(`/forgot-password${window.location.search || ""}#${hash}`);
+      } else {
+        window.location.replace(`/login${window.location.search || ""}#${hash}`);
+      }
+      return;
+    }
+    // エラー時: パスワードリセット関連（otp_expired など）→ /forgot-password へ
+    // それ以外 → /login でメッセージ表示
+    if (error_code) {
+      if (error_code === "otp_expired" || /expired|invalid/i.test(params.get("error_description") || "")) {
+        window.location.replace(`/forgot-password?error=expired${window.location.search ? "&" + window.location.search.slice(1) : ""}`);
+      } else {
+        window.location.replace(`/login${window.location.search || ""}#${hash}`);
+      }
       return;
     }
   }, []);

@@ -2,22 +2,14 @@
 
 import AuthForm from "@/components/AuthForm";
 import Header from "@/components/Header";
-import {
-  validatePassword,
-  PASSWORD_REQUIREMENTS_LABEL,
-  PASSWORD_REQUIREMENTS_ITEMS,
-} from "@/lib/passwordValidation";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [showSetPassword, setShowSetPassword] = useState(false);
-  const [setPasswordLoading, setSetPasswordLoading] = useState(false);
   const [setPasswordError, setSetPasswordError] = useState<string | null>(null);
   const [recovering, setRecovering] = useState(false);
-  const [newPasswordValue, setNewPasswordValue] = useState("");
 
   // メール確認・パスワードリセットメールのリンクから戻ってきた場合を処理
   useEffect(() => {
@@ -28,23 +20,28 @@ export default function LoginPage() {
     const type = params.get("type");
     const access_token = params.get("access_token");
     const refresh_token = params.get("refresh_token");
-    
-    // パスワードリセット（type=recovery）
-    if (type === "recovery" && access_token && refresh_token) {
-      setRecovering(true);
-      supabase.auth
-        .setSession({ access_token, refresh_token })
-        .then(() => {
-          setShowSetPassword(true);
-          window.history.replaceState(null, "", window.location.pathname + window.location.search);
-        })
-        .catch((err: unknown) => {
-          console.error("recovery setSession:", err);
-          setSetPasswordError("セッションの復元に失敗しました。リンクの有効期限が切れている可能性があります。");
-          setRecovering(false);
-        });
+    const error_code = params.get("error_code");
+    const error_description = params.get("error_description");
+
+    // エラー時: パスワードリセット関連（otp_expired）→ /forgot-password へリダイレクト
+    // ※直接 /login に来た場合のフォールバック
+    if (error_code) {
+      if (error_code === "otp_expired" || /expired|invalid/i.test(error_description || "")) {
+        window.location.replace(`/forgot-password?error=expired${window.location.search ? "&" + window.location.search.slice(1) : ""}`);
+        return;
+      }
+      setSetPasswordError("認証に失敗しました。もう一度お試しください。");
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      return;
     }
-    
+
+
+    // パスワードリセット（type=recovery）→ /forgot-password へリダイレクト
+    if (type === "recovery" && access_token && refresh_token) {
+      window.location.replace(`/forgot-password${window.location.search || ""}#${hash}`);
+      return;
+    }
+
     // メール確認（type=signup）
     if (type === "signup" && access_token && refresh_token) {
       setRecovering(true);
@@ -92,111 +89,24 @@ export default function LoginPage() {
     }
   }, [router]);
 
-  // 既にログインしており、パスワード設定不要な場合はダッシュボードへ（recovery 処理中は待機）
+  // 既にログインしており、パスワード設定不要な場合はダッシュボードへ（signup/email_change 処理中は待機）
+  // ※type=recovery の場合は /forgot-password へリダイレクトするため、ここではダッシュボードへ飛ばさない
   useEffect(() => {
-    if (showSetPassword || recovering) return;
+    if (recovering) return;
+    const hash = typeof window !== "undefined" ? window.location.hash?.replace("#", "") || "" : "";
+    const params = new URLSearchParams(hash);
+    if (params.get("type") === "recovery") return; // パスワードリセット中はスキップ
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) router.push("/dashboard");
     });
-  }, [router, showSetPassword, recovering]);
-
-  const handleSetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const password = (form.elements.namedItem("newPassword") as HTMLInputElement)?.value;
-    const confirm = (form.elements.namedItem("confirmPassword") as HTMLInputElement)?.value;
-    if (!password) {
-      setSetPasswordError("パスワードを入力してください。");
-      return;
-    }
-    const passwordResult = validatePassword(password);
-    if (!passwordResult.valid) {
-      setSetPasswordError(passwordResult.errors.join(" "));
-      return;
-    }
-    if (password !== confirm) {
-      setSetPasswordError("パスワードが一致しません。");
-      return;
-    }
-    setSetPasswordLoading(true);
-    setSetPasswordError(null);
-    try {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
-      router.push("/dashboard");
-    } catch (err: any) {
-      setSetPasswordError(err.message || "パスワードの更新に失敗しました。");
-    } finally {
-      setSetPasswordLoading(false);
-    }
-  };
-
-  if (showSetPassword) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="flex items-center justify-center px-6 py-12">
-          <div className="w-full max-w-md">
-            <div className="card">
-              <h1 className="text-xl font-bold text-primary mb-2">新しいパスワードを設定</h1>
-              <p className="text-sm text-on-background/70 mb-6">新しいパスワードを入力してください。</p>
-              <form onSubmit={handleSetPassword} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-on-background mb-2">新しいパスワード</label>
-                  <p className="text-xs text-on-background/70 mb-1.5">{PASSWORD_REQUIREMENTS_LABEL}</p>
-                  <ul className="text-xs text-on-background/70 mb-2 space-y-1">
-                    {PASSWORD_REQUIREMENTS_ITEMS.map((item) => (
-                      <li
-                        key={item.key}
-                        className={`flex items-center gap-2 ${
-                          newPasswordValue && item.test(newPasswordValue)
-                            ? "text-primary-accent"
-                            : "text-on-background/60"
-                        }`}
-                      >
-                        <span className="w-4">
-                          {newPasswordValue && item.test(newPasswordValue) ? "✓" : "・"}
-                        </span>
-                        {item.label}
-                      </li>
-                    ))}
-                  </ul>
-                  <input
-                    type="password"
-                    name="newPassword"
-                    className="input"
-                    placeholder="••••••••"
-                    required
-                    minLength={8}
-                    autoComplete="new-password"
-                    value={newPasswordValue}
-                    onChange={(e) => setNewPasswordValue(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-on-background mb-2">パスワード（確認）</label>
-                  <input type="password" name="confirmPassword" className="input" placeholder="••••••••" required minLength={8} autoComplete="new-password" />
-                </div>
-                {setPasswordError && (
-                  <div className="bg-highlight/10 border border-highlight text-highlight px-4 py-3 rounded-lg text-sm">{setPasswordError}</div>
-                )}
-                <button type="submit" disabled={setPasswordLoading} className="btn-primary w-full">
-                  {setPasswordLoading ? "設定中..." : "パスワードを設定"}
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  }, [router, recovering]);
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <div className="flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
-          {setPasswordError && !showSetPassword && (
+          {setPasswordError && (
             <div className="mb-4 bg-highlight/10 border border-highlight text-highlight px-4 py-3 rounded-lg text-sm">
               {setPasswordError}
             </div>
