@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 import { formatTime } from './dateUtils'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -14,9 +15,9 @@ if (!supabaseAnonKey) {
   console.error('[Supabase] Missing env: NEXT_PUBLIC_SUPABASE_ANON_KEY')
 }
 
-// 環境変数が設定されていない場合でも、ダミークライアントを作成してエラーを防ぐ
+// createBrowserClient でクッキー管理（ミドルウェアと同期、ログアウト時に確実にセッション解除）
 export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl!, supabaseAnonKey!)
+  ? createBrowserClient(supabaseUrl!, supabaseAnonKey!)
   : createClient('https://placeholder.supabase.co', 'placeholder-key')
 
 // 型定義（他のファイルで使用される可能性がある）

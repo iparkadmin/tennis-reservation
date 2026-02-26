@@ -16,12 +16,12 @@ export default function Footer() {
           >
             プライバシーポリシー
           </Link>
-          <Link
+          <a
             href="/admin"
             className="text-sm text-on-background/50 hover:text-on-background/70 hover:underline"
           >
             管理画面（運営者向け）
-          </Link>
+          </a>
         </div>
       </div>
     </footer>
