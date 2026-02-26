@@ -300,7 +300,7 @@ export default function ReservationDetailPage() {
                 className="btn-secondary flex items-center gap-2"
               >
                 <X className="w-4 h-4" />
-                キャンセル
+                変更をキャンセル
               </button>
             </div>
           </div>
