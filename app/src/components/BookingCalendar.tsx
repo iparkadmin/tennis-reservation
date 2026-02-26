@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { addDays, startOfWeek, format, parseISO, isSameDay } from "date-fns";
+import { addDays, startOfWeek, format, parseISO, isSameDay, startOfDay, isAfter } from "date-fns";
 import { ja } from "date-fns/locale/ja";
 import {
   getCourts,
@@ -12,7 +12,7 @@ import {
   saveUtilizers,
 } from "@/lib/supabase";
 import { UTILIZERS_LABEL, UTILIZERS_DESCRIPTION } from "@/lib/constants";
-import { isBookableDate, generateTimeSlots, formatDate } from "@/lib/dateUtils";
+import { isBookableDate, generateTimeSlots, formatDate, getMaxBookableDate, getSlotEndTime, formatTimeSlotDisplay } from "@/lib/dateUtils";
 import { Calendar, Clock, UserPlus, X } from "lucide-react";
 
 interface BookingCalendarProps {
@@ -305,7 +305,8 @@ export default function BookingCalendar({
         </div>
         <button
           onClick={() => moveWeek("next")}
-          className="px-4 py-2 rounded-lg bg-surface text-on-background hover:bg-surface/80"
+          disabled={isAfter(startOfDay(addDays(weekStart, 7)), getMaxBookableDate())}
+          className="px-4 py-2 rounded-lg bg-surface text-on-background hover:bg-surface/80 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           次週 →
         </button>
@@ -344,14 +345,12 @@ export default function BookingCalendar({
             {/* 時間スロット */}
             <div className="space-y-2">
               {timeSlots.map((start) => {
-                const end = `${(parseInt(start.split(":")[0]) + 1)
-                  .toString()
-                  .padStart(2, "0")}:00`;
+                const end = getSlotEndTime(start);
                 return (
                   <div key={start} className="grid grid-cols-8 gap-2 items-center">
                     <div className="text-sm text-on-background/70 flex items-center gap-1">
                       <Clock className="w-4 h-4" />
-                      {start}
+                      {formatTimeSlotDisplay(start)}
                     </div>
                     {weekDates.map((date) => {
                       const dateStr = format(date, "yyyy-MM-dd");

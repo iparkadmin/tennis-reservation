@@ -9,12 +9,20 @@ export default function Footer() {
         <p className="text-sm text-on-background/80">
           運営会社 iPark Institute Co., Ltd.
         </p>
-        <Link
-          href="/privacy-policy"
-          className="text-sm text-primary-accent hover:underline font-medium"
-        >
-          プライバシーポリシー
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/privacy-policy"
+            className="text-sm text-primary-accent hover:underline font-medium"
+          >
+            プライバシーポリシー
+          </Link>
+          <Link
+            href="/admin"
+            className="text-sm text-on-background/50 hover:text-on-background/70 hover:underline"
+          >
+            管理画面（運営者向け）
+          </Link>
+        </div>
       </div>
     </footer>
   );

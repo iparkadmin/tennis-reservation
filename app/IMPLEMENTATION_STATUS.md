@@ -17,6 +17,15 @@
 | `/member/reservations/[id]` | `app/member/reservations/[id]/page.tsx` | ✅ 予約詳細・変更（要ログイン） |
 | `/privacy-policy` | `app/privacy-policy/page.tsx` | ✅ プライバシーポリシー |
 | `/member/profile` | `app/member/profile/page.tsx` | ✅ プロフィール（参照のみ、mypageからリンク） |
+| `/admin` | `app/admin/page.tsx` | ✅ 管理画面ダッシュボード（要管理者ログイン） |
+| `/admin/users` | `app/admin/users/page.tsx` | ✅ ユーザー一覧・検索 |
+| `/admin/users/[id]` | `app/admin/users/[id]/page.tsx` | ✅ ユーザー詳細・運営メモ・予約代行作成 |
+| `/admin/users/mismatch` | `app/admin/users/mismatch/page.tsx` | ✅ auth/profiles 不整合確認 |
+| `/admin/reservations` | `app/admin/reservations/page.tsx` | ✅ 予約一覧・フィルター |
+| `/admin/reservations/[id]` | `app/admin/reservations/[id]/page.tsx` | ✅ 予約詳細・代理キャンセル |
+| `/admin/calendar` | `app/admin/calendar/page.tsx` | ✅ 予約カレンダー（管理用） |
+| `/admin/courts` | `app/admin/courts/page.tsx` | ✅ コート管理 |
+| `/admin/audit-logs` | `app/admin/audit-logs/page.tsx` | ✅ 監査ログ閲覧 |
 
 ---
 
@@ -77,10 +86,10 @@
 | ルール | 実装 |
 |--------|------|
 | 土曜・日曜・祝日のみ | ✅ `dateUtils.isBookableDate` → `isWeekend` or `isHoliday`（2025年祝日リスト）、BookingCalendar で使用 |
-| 9:00〜17:00、1時間単位 | ✅ `dateUtils.generateTimeSlots()`（9〜16時）、BookingCalendar |
+| 9-11, 11-13, 13-15, 15-17 の2時間枠 | ✅ `dateUtils.generateTimeSlots()`、BookingCalendar |
 | 1日2枠・1週間2枠 | ✅ 選択時に 1 日 2 枠まで（既存予約＋選択数を考慮）、表示 7 日で合計 2 枠まで。枠選択はトグル（再押下でキャンセル）。「予約を確定」で一括作成。DB の `check_daily_limit` も継続。 |
 | 1日2時間まで（DB） | ✅ DB の `check_daily_limit` トリガー（同一コート・同日）。クライアント側は上記の 1 日 2 枠で整合。 |
-| 前日までキャンセル可能（当日は不可） | ✅ `canModify(bookingDate)`: `date > tomorrow`。mypage、`member/reservations`、`member/reservations/[id]` で使用し、キャンセル・変更ボタンの表示を制御 |
+| 前日17時までキャンセル可能 | ✅ `canModifyReservation(bookingDate)`: 予約日の前日17:00が期限。mypage、`member/reservations`、`member/reservations/[id]` で使用 |
 
 ---
 
@@ -147,18 +156,23 @@
 
 ---
 
-## 13. 来館申請の注意表示
+## 13. 管理画面（/admin）
 
-来館申請とご予約者様の参加必須について、以下の画面に `VISIT_APPLICATION_NOTICE`（`src/lib/constants.ts`）を表示している。
+| 機能 | 実装 |
+|------|------|
+| 認可 | Middleware で `profiles.role = 'admin'` をチェック。未ログインは `/login?redirect=/admin` へ |
+| ダッシュボード | ユーザー数・予約数・直近予約のサマリー |
+| ユーザー一覧 | 検索（氏名・カナ・メール）、予約件数表示、auth/profiles 不整合リンク |
+| ユーザー詳細 | プロフィール・予約履歴・利用者（追加・編集・削除）・運営メモ・予約代行作成 |
+| 予約一覧 | 日付・コートでフィルター、ユーザー名・予約番号・連絡事項表示 |
+| 予約詳細 | 代理キャンセル、予約変更（会員画面へリンク） |
+| 予約カレンダー | 全予約の俯瞰、予約者名表示 |
+| コート管理 | 表示名・使用可否の編集 |
+| 監査ログ | 操作・テーブルでフィルター、直近200件表示 |
 
-| 画面 | 表示位置 |
-|------|----------|
-| トップ（/） | ご利用ルールの上（注意用カード） |
-| 予約カレンダー（/dashboard） | カレンダー上の説明ブロック内 |
-| 予約履歴（/member/reservations） | ページ下部 |
-| 予約詳細・変更（/member/reservations/[id]） | ページ下部 |
+**セットアップ**: `docs/app/27_admin_setup_guide.md` を参照。マイグレーション 23, 24 の実行と `profiles.role = 'admin'` の付与が必要。
 
-**文言：** ご利用の際には来館申請が必要となりますので、ご予約者様のお名前で、必ずご利用前日までに当日参加される方の来館申請を完了してください。また、ご予約者様ご自身のご参加を必須とし、ご利用ください。
+**注：** 来訪申請は不要となったため、関連する注意表示は削除済み（NOTICE_ITEMS から削除、UTILIZERS_DESCRIPTION を更新）。
 
 ---
 

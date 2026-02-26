@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { type Profile } from "@/lib/supabase";
 import Header from "@/components/Header";
+import Link from "next/link";
 import { User, Save, Mail, Trash2, AlertTriangle } from "lucide-react";
 
 export default function ProfilePage() {
@@ -178,6 +179,32 @@ export default function ProfilePage() {
         <Header />
         <main className="max-w-2xl mx-auto px-6 py-8">
           <div className="text-center text-on-background/70">読み込み中...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (profile?.is_blocked) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="max-w-2xl mx-auto px-6 py-8">
+          <div className="card max-w-2xl mx-auto">
+            <div className="flex items-start gap-4 p-4 rounded-lg bg-highlight/10 border border-highlight">
+              <AlertTriangle className="w-6 h-6 text-highlight flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-highlight mb-2">
+                  アカウントがブロックされています
+                </h3>
+                <p className="text-on-background mb-4">
+                  このアカウントは管理者によりブロックされています。予約の作成・変更・キャンセルはできません。ご不明な点は管理者にお問い合わせください。
+                </p>
+                <Link href="/" className="btn-secondary">
+                  トップへ戻る
+                </Link>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     );

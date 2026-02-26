@@ -13,7 +13,12 @@ import {
 
 type AuthMode = "login" | "signup";
 
-export default function AuthForm() {
+type AuthFormProps = {
+  /** ログイン成功後のリダイレクト先（例: /admin） */
+  redirectTo?: string;
+};
+
+export default function AuthForm({ redirectTo }: AuthFormProps) {
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -218,8 +223,8 @@ export default function AuthForm() {
           // エラーがあっても続行（通常のログインフロー）
         }
 
-        // ログイン成功時はページをリロードしてダッシュボードへ
-        window.location.href = "/dashboard";
+        // ログイン成功時はリダイレクト先へ（redirectTo がなければ /dashboard）
+        window.location.href = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/dashboard";
       }
     } catch (err: any) {
       // エラーメッセージを日本語に変換

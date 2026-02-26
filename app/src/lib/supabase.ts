@@ -27,6 +27,8 @@ export type Profile = {
   email: string
   created_at: string
   updated_at: string
+  role?: string
+  is_blocked?: boolean
 }
 
 export type Reservation = {
@@ -36,6 +38,8 @@ export type Reservation = {
   booking_date: string
   start_time: string
   end_time: string
+  contact_notes?: string
+  reservation_number?: string
   created_at: string
   updated_at?: string
   court?: {
@@ -44,6 +48,7 @@ export type Reservation = {
     display_name: string
     is_active: boolean
   }
+  profile?: Profile
 }
 
 export type Court = {
@@ -292,6 +297,216 @@ export async function deleteUtilizer(utilizerId: string, userId: string): Promis
     .eq('user_id', userId)
   if (error) {
     console.error('Error deleting utilizer:', error)
+    return false
+  }
+  return true
+}
+
+// ===========================================
+// 管理者用関数（RLS で role='admin' のユーザーのみ実行可能）
+// ===========================================
+
+export type ProfileWithReservationCount = Profile & { reservation_count: number }
+
+export async function getAllProfiles(): Promise<Profile[]> {
+  if (!isSupabaseConfigured) return []
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) {
+    console.error('Error fetching all profiles:', error)
+    return []
+  }
+  return data || []
+}
+
+export async function getProfilesWithReservationCount(): Promise<ProfileWithReservationCount[]> {
+  if (!isSupabaseConfigured) return []
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*, reservations(count)')
+    .order('created_at', { ascending: false })
+  if (error) {
+    console.error('Error fetching profiles with count:', error)
+    return []
+  }
+  return (data || []).map((p: any) => ({
+    ...p,
+    reservation_count: Array.isArray(p.reservations) && p.reservations[0] ? p.reservations[0].count : 0,
+    reservations: undefined,
+  })) as ProfileWithReservationCount[]
+}
+
+export async function getAllReservations(filters?: {
+  fromDate?: string
+  toDate?: string
+  courtId?: string
+}): Promise<Reservation[]> {
+  if (!isSupabaseConfigured) return []
+  let query = supabase
+    .from('reservations')
+    .select('*, court:courts(*), profile:profiles(*)')
+    .order('booking_date', { ascending: false })
+    .order('start_time', { ascending: false })
+  if (filters?.fromDate) {
+    query = query.gte('booking_date', filters.fromDate)
+  }
+  if (filters?.toDate) {
+    query = query.lte('booking_date', filters.toDate)
+  }
+  if (filters?.courtId) {
+    query = query.eq('court_id', filters.courtId)
+  }
+  const { data, error } = await query
+  if (error) {
+    console.error('Error fetching all reservations:', error)
+    return []
+  }
+  return (data || []).map((r: any) => ({
+    ...r,
+    profile: Array.isArray(r.profile) ? r.profile[0] : r.profile,
+  })) as Reservation[]
+}
+
+export async function getAdminReservationsByDate(
+  date: string,
+  courtId?: string
+): Promise<Reservation[]> {
+  if (!isSupabaseConfigured) return []
+  let query = supabase
+    .from('reservations')
+    .select('*, court:courts(*), profile:profiles(*)')
+    .eq('booking_date', date)
+    .order('start_time')
+  if (courtId) {
+    query = query.eq('court_id', courtId)
+  }
+  const { data, error } = await query
+  if (error) {
+    console.error('Error fetching admin reservations by date:', error)
+    return []
+  }
+  return (data || []).map((r: any) => ({
+    ...r,
+    profile: Array.isArray(r.profile) ? r.profile[0] : r.profile,
+  })) as Reservation[]
+}
+
+export async function createReservationForUser(
+  userId: string,
+  courtId: string,
+  bookingDate: string,
+  startTime: string,
+  endTime: string,
+  contactNotes?: string
+): Promise<Reservation | null> {
+  if (!isSupabaseConfigured) return null
+  const { data, error } = await supabase
+    .from('reservations')
+    .insert({
+      user_id: userId,
+      court_id: courtId,
+      booking_date: bookingDate,
+      start_time: startTime,
+      end_time: endTime,
+      contact_notes: contactNotes || null,
+    })
+    .select('*, court:courts(*)')
+    .single()
+  if (error) {
+    console.error('Error creating reservation for user:', error)
+    throw new Error(error.message || '予約の作成に失敗しました')
+  }
+  return data
+}
+
+export async function getAdminNotes(userId: string): Promise<{ id: string; content: string; created_at: string; author_id: string }[]> {
+  if (!isSupabaseConfigured) return []
+  const { data, error } = await supabase
+    .from('admin_notes')
+    .select('id, content, created_at, author_id')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  if (error) {
+    console.error('Error fetching admin notes:', error)
+    return []
+  }
+  return data || []
+}
+
+export async function addAdminNote(
+  userId: string,
+  authorId: string,
+  content: string
+): Promise<boolean> {
+  if (!isSupabaseConfigured) return false
+  const { error } = await supabase
+    .from('admin_notes')
+    .insert({ user_id: userId, author_id: authorId, content: content.trim() })
+  if (error) {
+    console.error('Error adding admin note:', error)
+    return false
+  }
+  return true
+}
+
+export async function getCourtsForAdmin(): Promise<Court[]> {
+  if (!isSupabaseConfigured) return []
+  const { data, error } = await supabase
+    .from('courts')
+    .select('*')
+    .order('name')
+  if (error) {
+    console.error('Error fetching courts for admin:', error)
+    return []
+  }
+  return data || []
+}
+
+export type AuditLog = {
+  id: string
+  user_id: string | null
+  action: string
+  table_name: string
+  record_id: string | null
+  old_data: Record<string, unknown> | null
+  new_data: Record<string, unknown> | null
+  created_at: string
+}
+
+export async function getAuditLogs(filters?: {
+  action?: string
+  tableName?: string
+  limit?: number
+}): Promise<AuditLog[]> {
+  if (!isSupabaseConfigured) return []
+  let query = supabase
+    .from('audit_logs')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (filters?.action) query = query.eq('action', filters.action)
+  if (filters?.tableName) query = query.eq('table_name', filters.tableName)
+  query = query.limit(filters?.limit ?? 100)
+  const { data, error } = await query
+  if (error) {
+    console.error('Error fetching audit logs:', error)
+    return []
+  }
+  return data || []
+}
+
+export async function updateCourt(
+  courtId: string,
+  updates: { display_name?: string; is_active?: boolean }
+): Promise<boolean> {
+  if (!isSupabaseConfigured) return false
+  const { error } = await supabase
+    .from('courts')
+    .update(updates)
+    .eq('id', courtId)
+  if (error) {
+    console.error('Error updating court:', error)
     return false
   }
   return true

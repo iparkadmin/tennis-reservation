@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { getAllUserReservations, type Reservation, type Profile } from "@/lib/supabase";
 import Header from "@/components/Header";
-import { formatDate, formatTime } from "@/lib/dateUtils";
+import { formatDate, formatTime, canModifyReservation } from "@/lib/dateUtils";
 import { User, Calendar, Clock, Edit, Save, Mail, Trash2, AlertTriangle } from "lucide-react";
 
 type TabType = "profile" | "reservations";
@@ -110,16 +111,7 @@ export default function MyPage() {
     }
   };
 
-  const canModify = (bookingDate: string) => {
-    const date = new Date(bookingDate);
-    date.setHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    // 前日までキャンセル可能（当日はキャンセル不可）
-    return date > tomorrow;
-  };
+  const canModify = (bookingDate: string) => canModifyReservation(bookingDate);
 
   if (loading) {
     return (
@@ -127,6 +119,33 @@ export default function MyPage() {
         <Header />
         <main className="max-w-4xl mx-auto px-6 py-8">
           <div className="text-center text-on-background/70">読み込み中...</div>
+        </main>
+      </div>
+    );
+  }
+
+  // ブロックされている場合
+  if (profile?.is_blocked) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="max-w-4xl mx-auto px-6 py-8">
+          <div className="card max-w-2xl mx-auto">
+            <div className="flex items-start gap-4 p-4 rounded-lg bg-highlight/10 border border-highlight">
+              <AlertTriangle className="w-6 h-6 text-highlight flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-highlight mb-2">
+                  アカウントがブロックされています
+                </h3>
+                <p className="text-on-background mb-4">
+                  このアカウントは管理者によりブロックされています。予約の作成・変更・キャンセルはできません。ご不明な点は管理者にお問い合わせください。
+                </p>
+                <Link href="/" className="btn-secondary">
+                  トップへ戻る
+                </Link>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     );

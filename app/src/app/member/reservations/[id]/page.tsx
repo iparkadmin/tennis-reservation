@@ -5,9 +5,10 @@ import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { type Reservation, getCourts, type Court } from "@/lib/supabase";
 import Header from "@/components/Header";
-import { formatDate, formatTime } from "@/lib/dateUtils";
+import { formatDate, formatTime, canModifyReservation } from "@/lib/dateUtils";
 import { NOTICE_ITEMS } from "@/lib/constants";
-import { Calendar, Clock, Edit, Save, X } from "lucide-react";
+import Link from "next/link";
+import { Calendar, Clock, Edit, Save, X, AlertTriangle } from "lucide-react";
 import BookingCalendar from "@/components/BookingCalendar";
 
 export default function ReservationDetailPage() {
@@ -27,6 +28,7 @@ export default function ReservationDetailPage() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [profile, setProfile] = useState<{ is_blocked?: boolean } | null>(null);
 
   const loadReservation = useCallback(async () => {
     try {
@@ -53,26 +55,20 @@ export default function ReservationDetailPage() {
   }, [reservationId]);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) {
         router.push("/login");
       } else {
         setUser(session.user);
+        const { getProfile } = await import("@/lib/supabase");
+        const p = await getProfile(session.user.id);
+        setProfile(p);
         loadReservation();
       }
     });
   }, [router, reservationId, loadReservation]);
 
-  const canModify = (bookingDate: string) => {
-    const date = new Date(bookingDate);
-    date.setHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    // 前日までキャンセル可能（当日はキャンセル不可）
-    return date > tomorrow;
-  };
+  const canModify = (bookingDate: string) => canModifyReservation(bookingDate);
 
   const handleUpdate = async () => {
     if (!reservation || !selectedTime || !selectedCourtId || !user) return;
@@ -118,6 +114,32 @@ export default function ReservationDetailPage() {
             <button onClick={() => router.push("/member/reservations")} className="btn-primary">
               予約履歴に戻る
             </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (profile?.is_blocked) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="max-w-4xl mx-auto px-6 py-8">
+          <div className="card max-w-2xl mx-auto">
+            <div className="flex items-start gap-4 p-4 rounded-lg bg-highlight/10 border border-highlight">
+              <AlertTriangle className="w-6 h-6 text-highlight flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-highlight mb-2">
+                  アカウントがブロックされています
+                </h3>
+                <p className="text-on-background mb-4">
+                  このアカウントは管理者によりブロックされています。予約の作成・変更・キャンセルはできません。ご不明な点は管理者にお問い合わせください。
+                </p>
+                <Link href="/" className="btn-secondary">
+                  トップへ戻る
+                </Link>
+              </div>
+            </div>
           </div>
         </main>
       </div>
@@ -194,7 +216,7 @@ export default function ReservationDetailPage() {
             {!canModifyReservation && (
               <div className="pt-4 border-t border-outline/20">
                 <p className="text-sm text-on-background/60">
-                  当日以降の予約は変更・キャンセルできません
+                  前日17時以降は変更・キャンセルできません
                 </p>
               </div>
             )}

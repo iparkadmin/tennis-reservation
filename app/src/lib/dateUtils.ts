@@ -1,4 +1,4 @@
-import { format, isWeekend as dateFnsIsWeekend, parseISO } from "date-fns";
+import { format, isWeekend as dateFnsIsWeekend, parseISO, subDays, addMonths, setHours, setMinutes, setSeconds, startOfDay, isBefore, isAfter } from "date-fns";
 import { ja } from "date-fns/locale/ja";
 
 // 日本の祝日リスト（2025年〜2027年）
@@ -68,7 +68,33 @@ export function isHoliday(date: Date | string): boolean {
   return HOLIDAYS.includes(dateStr);
 }
 
-export function isBookableDate(date: Date | string): boolean {
+/** 予約可能期間：今日から何か月先までか */
+export const BOOKABLE_PERIOD_MONTHS = 1;
+
+/** 予約可能期間の最終日（今日 + BOOKABLE_PERIOD_MONTHS） */
+export function getMaxBookableDate(referenceDate: Date = new Date()): Date {
+  const today = startOfDay(referenceDate);
+  return addMonths(today, BOOKABLE_PERIOD_MONTHS);
+}
+
+/** 日付が予約可能期間内か（今日〜1か月以内） */
+export function isWithinBookablePeriod(date: Date | string, referenceDate: Date = new Date()): boolean {
+  const dateObj = typeof date === "string" ? parseISO(date) : date;
+  const today = startOfDay(referenceDate);
+  const maxDate = getMaxBookableDate(referenceDate);
+  return !isBefore(dateObj, today) && !isAfter(dateObj, maxDate);
+}
+
+export function isBookableDate(date: Date | string, referenceDate: Date = new Date()): boolean {
+  const dateObj = typeof date === "string" ? parseISO(date) : date;
+  const today = startOfDay(referenceDate);
+  const maxDate = getMaxBookableDate(referenceDate);
+
+  // 過去の日付は予約不可
+  if (isBefore(dateObj, today)) return false;
+  // 1か月を超える将来日は予約不可
+  if (isAfter(dateObj, maxDate)) return false;
+  // 土日祝のみ予約可能
   return isWeekend(date) || isHoliday(date);
 }
 
@@ -81,11 +107,36 @@ export function formatTime(time: string): string {
   return time.substring(0, 5); // "HH:mm"形式に変換
 }
 
-// 9:00-17:00の1時間単位の時間スロットを生成
+/** 予約の変更・キャンセル可能期限：予約日の前日17:00まで */
+export const CANCELLATION_DEADLINE_HOUR = 17;
+
+/**
+ * 予約の変更・キャンセルが可能かどうか
+ * 予約日の前日17:00まで可能
+ */
+export function canModifyReservation(bookingDate: string, now: Date = new Date()): boolean {
+  const date = typeof bookingDate === "string" ? parseISO(bookingDate) : new Date(bookingDate);
+  const prevDay = subDays(date, 1);
+  const deadline = setSeconds(setMinutes(setHours(prevDay, CANCELLATION_DEADLINE_HOUR), 0), 0);
+  return now < deadline;
+}
+
+/** 1枠あたりの時間（時間） */
+export const SLOT_DURATION_HOURS = 2;
+
+/** スロットの終了時間を取得（開始時間 + SLOT_DURATION_HOURS） */
+export function getSlotEndTime(start: string): string {
+  const hour = parseInt(start.split(":")[0], 10);
+  return `${(hour + SLOT_DURATION_HOURS).toString().padStart(2, "0")}:00`;
+}
+
+/** 9-11, 11-13, 13-15, 15-17 の2時間枠を生成 */
 export function generateTimeSlots(): string[] {
-  const slots: string[] = [];
-  for (let hour = 9; hour < 17; hour++) {
-    slots.push(`${hour.toString().padStart(2, "0")}:00`);
-  }
-  return slots;
+  return ["09:00", "11:00", "13:00", "15:00"];
+}
+
+/** スロット表示用（例: "9-11"） */
+export function formatTimeSlotDisplay(start: string): string {
+  const h = parseInt(start.split(":")[0], 10);
+  return `${h}-${h + SLOT_DURATION_HOURS}`;
 }

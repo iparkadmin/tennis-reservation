@@ -3,11 +3,13 @@
 import AuthForm from "@/components/AuthForm";
 import Header from "@/components/Header";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect");
   const [setPasswordError, setSetPasswordError] = useState<string | null>(null);
   const [recovering, setRecovering] = useState(false);
 
@@ -97,9 +99,9 @@ export default function LoginPage() {
     const params = new URLSearchParams(hash);
     if (params.get("type") === "recovery") return; // パスワードリセット中はスキップ
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) router.push("/dashboard");
+      if (session) router.push(redirectTo && redirectTo.startsWith("/") ? redirectTo : "/dashboard");
     });
-  }, [router, recovering]);
+  }, [router, recovering, redirectTo]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -119,7 +121,7 @@ export default function LoginPage() {
               ログインまたは新規登録して予約を開始
             </p>
           </div>
-          <AuthForm />
+          <AuthForm redirectTo={redirectTo ?? undefined} />
         </div>
       </div>
     </div>

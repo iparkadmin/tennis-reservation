@@ -38,6 +38,33 @@ export default function DashboardPage() {
     );
   }
 
+  // ブロックされている場合
+  if (profile?.is_blocked) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="max-w-6xl mx-auto px-6 py-8">
+          <div className="card max-w-2xl mx-auto">
+            <div className="flex items-start gap-4 p-4 rounded-lg bg-highlight/10 border border-highlight">
+              <AlertCircle className="w-6 h-6 text-highlight flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-highlight mb-2">
+                  アカウントがブロックされています
+                </h3>
+                <p className="text-on-background mb-4">
+                  このアカウントは管理者によりブロックされています。予約の作成・変更・キャンセルはできません。ご不明な点は管理者にお問い合わせください。
+                </p>
+                <Link href="/" className="btn-secondary">
+                  トップへ戻る
+                </Link>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   // プロフィールが存在しない場合（削除済みユーザー）
   if (!profile) {
     return (
@@ -82,7 +109,7 @@ export default function DashboardPage() {
             予約カレンダー
           </h2>
           <p className="text-on-background/70">
-            土曜・日曜・祝日のみ予約可能です。1日2枠・1週間（表示の7日）で2枠まで。枠を選んで「予約を確定」を押してください。選択の解除は枠を再クリックしてください。
+            土曜・日曜・祝日のみ、今日から1か月以内が予約可能です。時間枠は9-11, 11-13, 13-15, 15-17の2時間単位。1日2枠・1週間（表示の7日）で2枠まで。枠を選んで「予約を確定」を押してください。選択の解除は枠を再クリックしてください。
           </p>
           <div className="mt-3 px-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-left">
             <h3 className="text-sm font-bold text-primary mb-2">注意事項</h3>
