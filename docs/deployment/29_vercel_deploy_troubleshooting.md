@@ -1,10 +1,30 @@
 # Vercel デプロイ トラブルシューティング
 
+## `cd app && npm run build` が exit 1 で失敗する場合
+
+**推奨**: Root Directory を **`vault/tennis-reservation/app`** に設定してください。
+
+| 設定 | 値 |
+|------|-----|
+| Root Directory | `vault/tennis-reservation/app` |
+| Build Command | （未指定＝デフォルトの `npm run build`） |
+| Install Command | （未指定＝デフォルトの `npm install`） |
+
+これにより `cd app` が不要になり、Vercel が Next.js を自動検出してビルドします。
+
+**Vercel での変更**:
+1. プロジェクト → **Settings** → **General**
+2. **Root Directory** を `vault/tennis-reservation/app` に変更（`vault/tennis-reservation` ではなく **`/app` まで含める**）
+3. **Override** の Build Command / Install Command が設定されていれば **削除**（デフォルトに戻す）
+4. **Save** → **Deployments** → 最新の **⋯** → **Redeploy**
+
+---
+
 ## 昨日はできたが今日できない場合の確認
 
-### 1. Root Directory の確認
+### 1. Root Directory の確認（従来の設定）
 
-**vault リポジトリ**の構造によって、Root Directory が異なります。
+`vault/tennis-reservation` を Root にしている場合、`vercel.json` の `cd app && npm run build` が使われます。失敗する場合は上記「app を Root にする」設定を推奨します。
 
 | リポジトリ構造 | Root Directory |
 |----------------|----------------|
