@@ -68,7 +68,7 @@ export default function ReservationDetailPage() {
     });
   }, [router, reservationId, loadReservation]);
 
-  const canModify = (bookingDate: string) => canModifyReservation(bookingDate);
+  const canModify = (bookingDate: string): boolean => canModifyReservation(bookingDate);
 
   const handleUpdate = async () => {
     if (!reservation || !selectedTime || !selectedCourtId || !user) return;

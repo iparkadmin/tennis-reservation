@@ -75,7 +75,7 @@ export default function AdminReservationDetailPage() {
   }
 
   const profile = reservation.profile;
-  const canModify = () => canModifyReservation(reservation.booking_date);
+  const canModify = (): boolean => canModifyReservation(reservation.booking_date);
 
   return (
     <div className="p-8">

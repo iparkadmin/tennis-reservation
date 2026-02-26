@@ -111,7 +111,7 @@ export default function MyPage() {
     }
   };
 
-  const canModify = (bookingDate: string) => canModifyReservation(bookingDate);
+  const canModify = (bookingDate: string): boolean => canModifyReservation(bookingDate);
 
   if (loading) {
     return (
