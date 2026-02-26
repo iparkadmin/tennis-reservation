@@ -8,8 +8,9 @@ import Header from "@/components/Header";
 import { formatDate, formatTime, canModifyReservation } from "@/lib/dateUtils";
 import { NOTICE_ITEMS } from "@/lib/constants";
 import Link from "next/link";
-import { Calendar, Clock, Edit, Save, X, AlertTriangle } from "lucide-react";
+import { Calendar, Clock, Edit, Save, X, AlertTriangle, UserPlus, Users } from "lucide-react";
 import BookingCalendar from "@/components/BookingCalendar";
+import { UTILIZERS_LABEL, UTILIZERS_DESCRIPTION } from "@/lib/constants";
 
 export default function ReservationDetailPage() {
   const router = useRouter();
@@ -29,6 +30,8 @@ export default function ReservationDetailPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<{ is_blocked?: boolean } | null>(null);
+  const [editUtilizers, setEditUtilizers] = useState<{ id?: string; full_name: string }[]>([]);
+  const [userUtilizers, setUserUtilizers] = useState<{ id: string; full_name: string }[]>([]);
 
   const loadReservation = useCallback(async () => {
     try {
@@ -42,8 +45,10 @@ export default function ReservationDetailPage() {
       setReservation(data);
       setSelectedDate(data.booking_date);
       setSelectedCourtId(data.court_id);
-      
-      // コート一覧を読み込む
+      setEditUtilizers(
+        (data.utilizers ?? []).map((u) => ({ id: u.id, full_name: u.full_name }))
+      );
+
       const courtsData = await getCourts();
       setCourts(courtsData);
     } catch (error) {
@@ -68,6 +73,17 @@ export default function ReservationDetailPage() {
     });
   }, [router, reservationId, loadReservation]);
 
+  // 編集モードでユーザーの利用者一覧を読み込み
+  useEffect(() => {
+    if (editing && user?.id) {
+      import("@/lib/supabase").then(({ getUtilizers }) =>
+        getUtilizers(user.id).then(setUserUtilizers)
+      );
+    } else {
+      setUserUtilizers([]);
+    }
+  }, [editing, user?.id]);
+
   const canModify = (bookingDate: string): boolean => canModifyReservation(bookingDate);
 
   const handleUpdate = async () => {
@@ -77,7 +93,13 @@ export default function ReservationDetailPage() {
       setSaving(true);
       setError(null);
 
-      const { updateReservation } = await import("@/lib/supabase");
+      const {
+        updateReservation,
+        createUtilizer,
+        updateUtilizer,
+        setReservationUtilizers,
+      } = await import("@/lib/supabase");
+
       await updateReservation(reservation.id, {
         court_id: selectedCourtId,
         booking_date: selectedDate,
@@ -85,12 +107,44 @@ export default function ReservationDetailPage() {
         end_time: selectedTime.end,
       });
 
+      const utilizerIds: string[] = [];
+      for (const u of editUtilizers) {
+        const name = u.full_name?.trim();
+        if (!name) continue;
+        if (u.id) {
+          const orig = userUtilizers.find((x) => x.id === u.id);
+          if (orig && orig.full_name !== name) {
+            await updateUtilizer(u.id, user.id, { full_name: name });
+          }
+          utilizerIds.push(u.id);
+        } else {
+          const created = await createUtilizer(user.id, name);
+          if (created) utilizerIds.push(created.id);
+        }
+      }
+      await setReservationUtilizers(reservation.id, utilizerIds);
+
       router.push("/member/reservations");
     } catch (error: any) {
       setError(error.message || "予約の変更に失敗しました");
     } finally {
       setSaving(false);
     }
+  };
+
+  const addEditUtilizer = () =>
+    setEditUtilizers((prev) => [...prev, { full_name: "" }]);
+  const updateEditUtilizer = (index: number, full_name: string) =>
+    setEditUtilizers((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], full_name };
+      return next;
+    });
+  const removeEditUtilizer = (index: number) =>
+    setEditUtilizers((prev) => prev.filter((_, i) => i !== index));
+  const addFromUserUtilizers = (u: { id: string; full_name: string }) => {
+    if (editUtilizers.some((eu) => eu.id === u.id)) return;
+    setEditUtilizers((prev) => [...prev, { id: u.id, full_name: u.full_name }]);
   };
 
   if (loading) {
@@ -194,6 +248,23 @@ export default function ReservationDetailPage() {
                 {formatTime(reservation.start_time)} - {formatTime(reservation.end_time)}
               </span>
             </div>
+            {reservation.utilizers && reservation.utilizers.length > 0 && (
+              <div className="flex items-start gap-3 pt-4 border-t border-outline/20">
+                <Users className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-on-background/70 mb-1">
+                    {UTILIZERS_LABEL}
+                  </p>
+                  <ul className="space-y-1">
+                    {reservation.utilizers.map((u) => (
+                      <li key={u.id} className="text-on-background">
+                        {u.full_name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
             {(reservation as any).reservation_number && (
               <div className="pt-4 border-t border-outline/20">
                 <span className="text-sm text-on-background/60">予約番号:</span>
@@ -280,6 +351,61 @@ export default function ReservationDetailPage() {
               />
             </div>
 
+            {/* 利用者の変更 */}
+            <div className="card">
+              <h3 className="text-lg font-bold text-primary mb-2">
+                {UTILIZERS_LABEL}
+              </h3>
+              <p className="text-xs text-on-background/60 mb-3">
+                {UTILIZERS_DESCRIPTION}
+              </p>
+              <div className="space-y-2 mb-3">
+                {editUtilizers.map((u, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={u.full_name}
+                      onChange={(e) => updateEditUtilizer(i, e.target.value)}
+                      className="input flex-1"
+                      placeholder="氏名"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeEditUtilizer(i)}
+                      className="p-2 text-highlight hover:bg-highlight/10 rounded-lg"
+                      title="削除"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={addEditUtilizer}
+                  className="text-sm text-primary-accent hover:underline flex items-center gap-1"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  利用者を追加
+                </button>
+                {userUtilizers
+                  .filter(
+                    (u) => !editUtilizers.some((eu) => eu.id === u.id || eu.full_name === u.full_name)
+                  )
+                  .map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => addFromUserUtilizers(u)}
+                      className="text-sm px-2 py-1 rounded bg-surface text-on-background/80 hover:bg-surface/80"
+                    >
+                      + {u.full_name}
+                    </button>
+                  ))}
+              </div>
+            </div>
+
             <p className="text-sm text-primary font-medium">
               変更確定後もメール通知は送信されません。予約履歴でご確認ください。
             </p>
@@ -296,6 +422,9 @@ export default function ReservationDetailPage() {
                 onClick={() => {
                   setEditing(false);
                   setSelectedTime(null);
+                  setEditUtilizers(
+                    (reservation?.utilizers ?? []).map((u) => ({ id: u.id, full_name: u.full_name }))
+                  );
                 }}
                 className="btn-secondary flex items-center gap-2"
               >

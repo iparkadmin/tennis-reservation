@@ -50,6 +50,7 @@ export type Reservation = {
     is_active: boolean
   }
   profile?: Profile
+  utilizers?: Utilizer[]
 }
 
 export type Court = {
@@ -139,7 +140,50 @@ export async function getReservationById(reservationId: string): Promise<Reserva
     console.error('Error fetching reservation:', error)
     return null
   }
-  return data
+  const utilizers = await getReservationUtilizers(reservationId)
+  return { ...data, utilizers }
+}
+
+/** 予約に紐づく利用者一覧を取得 */
+export async function getReservationUtilizers(reservationId: string): Promise<Utilizer[]> {
+  if (!isSupabaseConfigured) return []
+  const { data: ru, error: ruError } = await supabase
+    .from('reservation_utilizers')
+    .select('utilizer_id')
+    .eq('reservation_id', reservationId)
+  if (ruError || !ru?.length) return []
+  const ids = ru!.map((r) => r.utilizer_id)
+  const { data: utilizers, error } = await supabase
+    .from('utilizers')
+    .select('*')
+    .in('id', ids)
+  if (error) return []
+  const orderMap = new Map(ids.map((id, i) => [id, i]))
+  return (utilizers || []).sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0))
+}
+
+/** 予約に紐づく利用者を設定（既存を置換） */
+export async function setReservationUtilizers(
+  reservationId: string,
+  utilizerIds: string[]
+): Promise<boolean> {
+  if (!isSupabaseConfigured) return false
+  const { error: delError } = await supabase
+    .from('reservation_utilizers')
+    .delete()
+    .eq('reservation_id', reservationId)
+  if (delError) {
+    console.error('Error clearing reservation utilizers:', delError)
+    return false
+  }
+  if (utilizerIds.length === 0) return true
+  const rows = utilizerIds.map((utilizer_id) => ({ reservation_id: reservationId, utilizer_id }))
+  const { error: insError } = await supabase.from('reservation_utilizers').insert(rows)
+  if (insError) {
+    console.error('Error setting reservation utilizers:', insError)
+    return false
+  }
+  return true
 }
 
 export async function updateReservation(
@@ -260,26 +304,33 @@ export async function updateUtilizer(
   return true
 }
 
-/** 予約確定時に利用者一覧を保存（新規追加・更新・削除を同期） */
+/** 予約確定時に利用者一覧を保存（新規追加・更新・削除を同期）。保存後の利用者一覧（ID付き）を返す */
 export async function saveUtilizers(
   userId: string,
   utilizers: { id?: string; full_name: string }[]
-): Promise<void> {
-  if (!isSupabaseConfigured) return
+): Promise<Utilizer[]> {
+  if (!isSupabaseConfigured) return []
   const existing = await getUtilizers(userId)
   const existingIds = new Set(existing.map((u) => u.id))
   const formIds = new Set(utilizers.filter((u) => u.id).map((u) => u.id!))
+  const result: Utilizer[] = []
 
   for (const u of utilizers) {
     const name = u.full_name?.trim()
     if (!name) continue
     if (u.id && existingIds.has(u.id)) {
       const orig = existing.find((x) => x.id === u.id)
-      if (orig && orig.full_name !== name) {
-        await updateUtilizer(u.id, userId, { full_name: name })
+      if (orig) {
+        if (orig.full_name !== name) {
+          await updateUtilizer(u.id, userId, { full_name: name })
+          result.push({ ...orig, full_name: name })
+        } else {
+          result.push(orig)
+        }
       }
     } else if (!u.id) {
-      await createUtilizer(userId, name)
+      const created = await createUtilizer(userId, name)
+      if (created) result.push(created)
     }
   }
   for (const id of existingIds) {
@@ -287,6 +338,7 @@ export async function saveUtilizers(
       await deleteUtilizer(id, userId)
     }
   }
+  return result
 }
 
 export async function deleteUtilizer(utilizerId: string, userId: string): Promise<boolean> {
@@ -518,7 +570,8 @@ export async function createReservation(
   courtId: string,
   bookingDate: string,
   startTime: string,
-  endTime: string
+  endTime: string,
+  utilizerIds?: string[]
 ): Promise<Reservation | null> {
   if (!isSupabaseConfigured) return null
   const { data, error } = await supabase
@@ -535,6 +588,9 @@ export async function createReservation(
   if (error) {
     console.error('Error creating reservation:', error)
     throw new Error(error.message || '予約の作成に失敗しました')
+  }
+  if (data && utilizerIds?.length) {
+    await setReservationUtilizers(data.id, utilizerIds)
   }
   return data
 }

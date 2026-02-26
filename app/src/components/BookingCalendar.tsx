@@ -211,7 +211,8 @@ export default function BookingCalendar({
       setError(null);
 
       const toSave = utilizers.filter((u) => u.full_name.trim());
-      await saveUtilizers(userId, toSave);
+      const saved = await saveUtilizers(userId, toSave);
+      const utilizerIds = saved.map((u) => u.id);
 
       for (const slot of selectedSlots) {
         await createReservation(
@@ -219,7 +220,8 @@ export default function BookingCalendar({
           slot.courtId,
           slot.date,
           slot.start,
-          slot.end
+          slot.end,
+          utilizerIds
         );
       }
 
