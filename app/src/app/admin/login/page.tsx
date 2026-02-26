@@ -18,8 +18,8 @@ function AdminLoginContent() {
         </div>
         <AdminLoginForm redirectTo={redirectTo} />
         <p className="mt-6 text-center text-sm text-on-background/60">
-          <Link href="/" className="text-primary hover:underline">
-            トップページへ
+          <Link href="/admin" className="text-primary hover:underline">
+            管理者トップページへ
           </Link>
         </p>
       </div>

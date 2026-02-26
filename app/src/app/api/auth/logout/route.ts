@@ -23,5 +23,13 @@ export async function GET(request: NextRequest) {
 
   await supabase.auth.signOut();
 
+  // 明示的に認証クッキーを削除（sb- で始まるクッキー）
+  const allCookies = request.cookies.getAll();
+  for (const cookie of allCookies) {
+    if (cookie.name.startsWith("sb-")) {
+      response.cookies.set(cookie.name, "", { path: "/", maxAge: 0 });
+    }
+  }
+
   return response;
 }

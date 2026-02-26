@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, Calendar, CalendarDays, LogOut, Building2, FileText, KeyRound } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export default function AdminLayout({
   children,
@@ -12,7 +13,8 @@ export default function AdminLayout({
   const pathname = usePathname();
   const isLoginPage = pathname === "/admin/login";
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     window.location.href = "/api/auth/logout";
   };
 

@@ -88,7 +88,7 @@ export default function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
 
           <div>
             <label className="block text-sm font-medium text-on-background mb-2">
-              管理者ID（メールアドレス）
+              管理者ID
             </label>
             <input
               type="email"
