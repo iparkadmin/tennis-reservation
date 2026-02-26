@@ -109,7 +109,7 @@ export default function DashboardPage() {
             予約カレンダー
           </h2>
           <p className="text-on-background/70">
-            土曜・日曜・祝日のみ、今日から1か月以内が予約可能です。時間枠は9-11, 11-13, 13-15, 15-17の2時間単位。1日2枠・1週間（表示の7日）で2枠まで。枠を選んで「予約を確定」を押してください。選択の解除は枠を再クリックしてください。
+            土曜・日曜・祝日のみ、今日から1か月以内が予約可能です。時間枠は9時ー11時、11時ー13時、13時ー15時、15時ー17時の2時間単位。1日2枠・1週間（表示の7日）で2枠まで。枠を選んで「予約を確定」を押してください。選択の解除は枠を再クリックしてください。
           </p>
           <div className="mt-3 px-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-left">
             <h3 className="text-sm font-bold text-primary mb-2">注意事項</h3>

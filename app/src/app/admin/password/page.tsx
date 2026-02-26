@@ -135,7 +135,7 @@ export default function AdminPasswordPage() {
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
                 className="input w-full pr-10"
-                placeholder="••••••••"
+                placeholder="現在のパスワードを入力"
                 autoComplete="current-password"
               />
               <button

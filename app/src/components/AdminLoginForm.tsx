@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
+
+const ADMIN_ID_STORAGE_KEY = "tennis-admin-last-id";
 
 type AdminLoginFormProps = {
   /** ログイン成功後のリダイレクト先（例: /admin） */
@@ -11,8 +13,18 @@ type AdminLoginFormProps = {
 };
 
 export default function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
-  const [email, setEmail] = useState("");
+  const defaultId = process.env.NEXT_PUBLIC_ADMIN_ID ?? "";
+  const [id, setId] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem(ADMIN_ID_STORAGE_KEY);
+    const initial = saved || defaultId;
+    if (initial) {
+      setId(initial);
+    }
+  }, [defaultId]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +36,7 @@ export default function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
 
     try {
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
+        email: id,
         password,
       });
 
@@ -59,7 +71,10 @@ export default function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
         return;
       }
 
-      // 管理者としてログイン成功 → リダイレクト
+      // 管理者としてログイン成功 → IDを保存してリダイレクト
+      if (typeof window !== "undefined") {
+        localStorage.setItem(ADMIN_ID_STORAGE_KEY, id);
+      }
       const target = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/admin";
       window.location.href = target;
     } catch (err: unknown) {
@@ -91,10 +106,10 @@ export default function AdminLoginForm({ redirectTo }: AdminLoginFormProps) {
               管理者ID
             </label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@example.com"
+              type="text"
+              value={id}
+              onChange={(e) => setId(e.target.value)}
+              placeholder={defaultId || "管理者IDを入力"}
               required
               className="input w-full"
               autoComplete="username"

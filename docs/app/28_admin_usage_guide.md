@@ -85,8 +85,10 @@
 Supabase SQL Editor で実行:
 
 ```sql
-UPDATE profiles SET role = 'admin' WHERE email = '管理者のメールアドレス@example.com';
+UPDATE profiles SET role = 'admin' WHERE email = '管理者のID@example.com';
 ```
+
+**ログイン画面のデフォルト表示**: 環境変数 `NEXT_PUBLIC_ADMIN_ID` に管理者IDを設定すると、ログイン画面の管理者ID欄に初期値として表示されます。
 
 ---
 

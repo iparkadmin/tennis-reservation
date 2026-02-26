@@ -1,6 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { getAdminClient } from "@/lib/adminSupabase";
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,10 +46,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "管理者権限が必要です" }, { status: 403 });
     }
 
-    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
-
+    const adminClient = getAdminClient();
     const { data: authData } = await adminClient.auth.admin.listUsers({
       perPage: 1000,
     });

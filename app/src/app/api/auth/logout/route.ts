@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
   const allCookies = request.cookies.getAll();
   for (const cookie of allCookies) {
     if (cookie.name.startsWith("sb-")) {
-      response.cookies.set(cookie.name, "", { path: "/", maxAge: 0 });
+      response.cookies.delete(cookie.name);
     }
   }
 

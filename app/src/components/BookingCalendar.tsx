@@ -411,7 +411,7 @@ export default function BookingCalendar({
                     <div className="flex items-center gap-3">
                       <Calendar className="w-4 h-4 text-primary" />
                       <span className="text-sm">
-                        {formatDate(slot.date)} {slot.start} - {slot.end}
+                        {formatDate(slot.date)} {formatTimeSlotDisplay(slot.start)}
                       </span>
                       {court && (
                         <span className="text-xs text-on-background/60">

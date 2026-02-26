@@ -85,6 +85,13 @@ export default function MyPage() {
         full_name: formData.full_name,
         full_name_kana: formData.full_name_kana,
       });
+      // auth.users の user_metadata も同期
+      await supabase.auth.updateUser({
+        data: {
+          full_name: formData.full_name,
+          full_name_kana: formData.full_name_kana,
+        },
+      });
       await loadProfile(user.id);
       setEditing(false);
     } catch (error: any) {

@@ -135,8 +135,8 @@ export function generateTimeSlots(): string[] {
   return ["09:00", "11:00", "13:00", "15:00"];
 }
 
-/** スロット表示用（例: "9-11"） */
+/** スロット表示用（例: "9時ー11時"） */
 export function formatTimeSlotDisplay(start: string): string {
   const h = parseInt(start.split(":")[0], 10);
-  return `${h}-${h + SLOT_DURATION_HOURS}`;
+  return `${h}時ー${h + SLOT_DURATION_HOURS}時`;
 }

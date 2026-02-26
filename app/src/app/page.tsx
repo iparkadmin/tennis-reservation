@@ -90,7 +90,7 @@ export default function Home() {
               1時間単位で予約
             </h3>
             <p className="text-on-background/70 text-sm">
-              9-11, 11-13, 13-15, 15-17 の2時間枠で予約可能。1日最大2枠（4時間）まで。
+              9時ー11時、11時ー13時、13時ー15時、15時ー17時の2時間枠で予約可能。1日最大2枠（4時間）まで。
             </p>
           </div>
 
@@ -130,11 +130,11 @@ export default function Home() {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary-accent">•</span>
-              予約可能時間：9-11, 11-13, 13-15, 15-17（2時間枠）
+              予約可能時間：9時ー11時、11時ー13時、13時ー15時、15時ー17時（2時間枠）
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary-accent">•</span>
-              1日の最大予約時間：2時間まで
+              ご利用時間は指定の2時間ごととなります。
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary-accent">•</span>

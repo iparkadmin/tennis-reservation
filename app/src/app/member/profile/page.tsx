@@ -108,6 +108,13 @@ export default function ProfilePage() {
         full_name: formData.full_name,
         full_name_kana: formData.full_name_kana,
       });
+      // auth.users の user_metadata も同期
+      await supabase.auth.updateUser({
+        data: {
+          full_name: formData.full_name,
+          full_name_kana: formData.full_name_kana,
+        },
+      });
 
       setMessage("プロフィールを更新しました");
       await loadProfile(user.id);
