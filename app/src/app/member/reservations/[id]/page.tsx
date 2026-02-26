@@ -146,7 +146,7 @@ export default function ReservationDetailPage() {
     );
   }
 
-  const canModifyReservation = canModify(reservation.booking_date);
+  const isModifiable = canModify(reservation.booking_date);
 
   return (
     <div className="min-h-screen bg-background">
@@ -154,7 +154,7 @@ export default function ReservationDetailPage() {
       <main className="max-w-4xl mx-auto px-6 py-8">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-primary mb-2">予約詳細</h2>
-          {canModifyReservation && !editing && (
+          {isModifiable && !editing && (
             <button
               onClick={() => setEditing(true)}
               className="btn-secondary flex items-center gap-2"
@@ -213,7 +213,7 @@ export default function ReservationDetailPage() {
                 {new Date(reservation.created_at).toLocaleString("ja-JP")}
               </p>
             </div>
-            {!canModifyReservation && (
+            {!isModifiable && (
               <div className="pt-4 border-t border-outline/20">
                 <p className="text-sm text-on-background/60">
                   前日17時以降は変更・キャンセルできません
