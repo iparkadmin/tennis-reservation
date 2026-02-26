@@ -87,10 +87,10 @@ export default function Home() {
               <Clock className="w-8 h-8 text-primary-light" />
             </div>
             <h3 className="text-lg font-bold text-primary mb-2">
-              1時間単位で予約
+              2時間単位で予約
             </h3>
             <p className="text-on-background/70 text-sm">
-              9時ー11時、11時ー13時、13時ー15時、15時ー17時の2時間枠で予約可能。1日最大2枠（4時間）まで。
+              9時ー11時、11時ー13時、13時ー15時、15時ー17時の2時間枠で、1日1枠まで予約可能。
             </p>
           </div>
 
