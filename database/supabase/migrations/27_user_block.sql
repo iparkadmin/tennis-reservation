@@ -28,6 +28,7 @@ GRANT EXECUTE ON FUNCTION public.is_blocked_user(UUID) TO authenticated;
 -- ===========================================
 -- 3. profiles: 管理者は任意のプロフィールを更新可能（ブロック操作用）
 -- ===========================================
+DROP POLICY IF EXISTS "Admins can update any profile" ON profiles;
 CREATE POLICY "Admins can update any profile" ON profiles
   FOR UPDATE USING (public.is_admin()) WITH CHECK (public.is_admin());
 
@@ -62,5 +63,6 @@ CREATE POLICY "Users can delete own reservations" ON reservations
 -- 管理者が他ユーザーに代わって予約を作成する場合、user_id は対象ユーザー。
 -- 既存の "Authenticated users can create reservations" は auth.uid() = user_id を要求するため、
 -- 管理者用の INSERT ポリシーを追加する。
+DROP POLICY IF EXISTS "Admins can insert reservations for any user" ON reservations;
 CREATE POLICY "Admins can insert reservations for any user" ON reservations
   FOR INSERT WITH CHECK (public.is_admin());
