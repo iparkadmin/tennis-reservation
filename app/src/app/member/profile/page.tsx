@@ -15,7 +15,6 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -125,11 +124,9 @@ export default function ProfilePage() {
     }
   };
 
-
   const handleDeleteAccount = async () => {
     if (!user) return;
 
-    // 2段階確認
     const confirm1 = window.confirm(
       "アカウントを削除すると、すべてのデータ（プロフィール、予約履歴など）が永久に削除されます。\n\nこの操作は取り消せません。本当に削除しますか？"
     );
@@ -144,18 +141,14 @@ export default function ProfilePage() {
     setError(null);
 
     try {
-      // セッションからトークンを取得
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         throw new Error("セッションが見つかりません");
       }
 
-      // API Routeを呼び出してアカウントを削除
       const response = await fetch("/api/delete-account", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user.id,
           accessToken: session.access_token,
@@ -168,11 +161,8 @@ export default function ProfilePage() {
         throw new Error(data.error || "アカウントの削除に失敗しました");
       }
 
-      // ログアウトしてトップページにリダイレクト
       await supabase.auth.signOut();
       router.push("/");
-      
-      // ページをリロードして完全にログアウト状態にする
       window.location.href = "/";
     } catch (error: any) {
       setError(error.message || "アカウントの削除に失敗しました");
@@ -420,18 +410,11 @@ export default function ProfilePage() {
           </div>
         </form>
 
-        {/* アカウント削除セクション */}
         <div className="card mt-8 border-t border-outline/20 pt-6">
-          <div className="mb-4">
-            <h3 className="text-lg font-bold text-highlight mb-2 flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5" />
-              危険な操作
-            </h3>
-            <p className="text-sm text-on-background/70 mb-4">
-              アカウントを削除すると、すべてのデータ（プロフィール情報、予約履歴など）が永久に削除されます。
-              この操作は取り消せません。
-            </p>
-          </div>
+          <p className="text-sm text-on-background/70 mb-4">
+            アカウントを削除すると、すべてのデータ（プロフィール情報、予約履歴など）が永久に削除されます。
+            この操作は取り消せません。
+          </p>
           <button
             type="button"
             onClick={handleDeleteAccount}
