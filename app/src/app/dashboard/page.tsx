@@ -1,5 +1,6 @@
 "use client";
 
+// 予約カレンダーダッシュボード
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
