@@ -31,7 +31,7 @@
 | 設定項目 | 入力値 |
 |----------|--------|
 | **Project Name** | 任意（例: `tennis-court-reservation`） |
-| **Root Directory** | **`tennis-reservation`** を指定（vercel.json と package.json で app を参照） |
+| **Root Directory** | **`vault/tennis-reservation`** または **`tennis-reservation`**（リポジトリ構造による。GitHub で `tennis-reservation` の位置を確認） |
 | **Framework Preset** | Next.js（自動検出のまま） |
 | **Build Command** | 未指定 |
 | **Output Directory** | 未指定 |
@@ -102,8 +102,8 @@ git push origin main
 | 現象 | 対処 |
 |------|------|
 | リポジトリが Vercel の一覧に出ない | GitHub App の権限で vault を選択し直す |
-| ビルドが 404 / ファイルがない | Root Directory が `tennis-reservation` になっているか確認 |
-| **No Next.js version detected** | Root Directory を **`tennis-reservation`** に変更（package.json に next を含む）→ Redeploy |
+| ビルドが 404 / ファイルがない | Root Directory を確認。`vault/tennis-reservation` または `tennis-reservation` を試す。詳細は `29_vercel_deploy_troubleshooting.md` |
+| **No Next.js version detected** | Root Directory を **`vault/tennis-reservation`** または **`tennis-reservation`** に変更 → Redeploy |
 | `supabaseUrl is required` | 上記 4 つの環境変数が設定されているか確認 → **Redeploy** |
 | ログイン後に localhost や 404 | Supabase の **Site URL** と **Redirect URLs** を本番 URL に設定 |
 
