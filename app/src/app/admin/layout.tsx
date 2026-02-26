@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Users, Calendar, CalendarDays, LogOut, Building2, FileText } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, CalendarDays, LogOut, Building2, FileText, KeyRound } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminLayout({
@@ -12,6 +12,7 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const isLoginPage = pathname === "/admin/login";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -26,6 +27,11 @@ export default function AdminLayout({
     { href: "/admin/courts", label: "コート管理", icon: Building2 },
     { href: "/admin/audit-logs", label: "監査ログ", icon: FileText },
   ];
+
+  // ログインページではサイドバーを表示しない
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -52,6 +58,13 @@ export default function AdminLayout({
           })}
         </nav>
         <div className="p-2 border-t border-primary/20">
+          <Link
+            href="/admin/password"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-on-primary/90 hover:bg-primary/20 transition-colors text-sm"
+          >
+            <KeyRound className="w-4 h-4" />
+            パスワード変更
+          </Link>
           <Link
             href="/"
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-on-primary/90 hover:bg-primary/20 transition-colors text-sm"

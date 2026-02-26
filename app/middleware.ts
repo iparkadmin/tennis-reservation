@@ -27,10 +27,10 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // /admin 配下は管理者のみアクセス可能
-  if (request.nextUrl.pathname.startsWith("/admin")) {
+  // /admin 配下は管理者のみアクセス可能（/admin/login は除く）
+  if (request.nextUrl.pathname.startsWith("/admin") && !request.nextUrl.pathname.startsWith("/admin/login")) {
     if (!user) {
-      const loginUrl = new URL("/login", request.url);
+      const loginUrl = new URL("/admin/login", request.url);
       loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }
