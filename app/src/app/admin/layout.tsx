@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, Calendar, CalendarDays, LogOut, Building2, FileText, KeyRound } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 
 export default function AdminLayout({
   children,
@@ -11,12 +10,10 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
   const isLoginPage = pathname === "/admin/login";
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
+  const handleLogout = () => {
+    window.location.href = "/api/auth/logout";
   };
 
   const navItems = [

@@ -105,6 +105,13 @@ export default function AdminPasswordPage() {
           初期パスワードから変更する場合は、現在のパスワードを入力し、新しいパスワードを設定してください。
         </p>
 
+        {email && (
+          <div className="mb-6 p-4 rounded-lg bg-surface/50 border border-outline/20">
+            <label className="block text-sm font-medium text-on-background/70 mb-1">現在のID</label>
+            <p className="text-on-background font-medium">{email}</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div className="bg-highlight/10 border border-highlight text-highlight px-4 py-3 rounded-lg text-sm">
@@ -207,6 +214,12 @@ export default function AdminPasswordPage() {
             </Link>
           </div>
         </form>
+
+        <div className="mt-6 pt-4 border-t border-outline/20 text-center">
+          <Link href="/admin" className="text-sm text-primary hover:underline">
+            管理者トップページへ
+          </Link>
+        </div>
       </div>
     </div>
   );
