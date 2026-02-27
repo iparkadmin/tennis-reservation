@@ -10,6 +10,7 @@ import {
   createReservation,
   getUtilizers,
   saveUtilizers,
+  getProfile,
 } from "@/lib/supabase";
 import { UTILIZERS_LABEL, UTILIZERS_DESCRIPTION } from "@/lib/constants";
 import { isBookableDate, generateTimeSlots, formatDate, getMaxBookableDate, getSlotEndTime, formatTimeSlotDisplay } from "@/lib/dateUtils";
@@ -47,22 +48,25 @@ export default function BookingCalendar({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [utilizers, setUtilizers] = useState<{ id?: string; full_name: string }[]>([]);
+  const [applicantName, setApplicantName] = useState<string>("");
 
   const timeSlots = generateTimeSlots();
 
-  // スロット選択時に利用者を読み込み（過去登録があればデフォルト表示）
+  // スロット選択時に利用者と申請者名を読み込み
   useEffect(() => {
     if (userId && selectedSlots.length > 0) {
-      getUtilizers(userId).then((data) => {
+      Promise.all([getUtilizers(userId), getProfile(userId)]).then(([utilizersData, profileData]) => {
+        setApplicantName(profileData?.full_name ?? "");
         setUtilizers((prev) => {
           if (prev.length > 0) return prev;
-          return data.length > 0
-            ? data.map((u) => ({ id: u.id, full_name: u.full_name }))
+          return utilizersData.length > 0
+            ? utilizersData.map((u) => ({ id: u.id, full_name: u.full_name }))
             : [{ full_name: "" }];
         });
       });
     } else if (selectedSlots.length === 0) {
       setUtilizers([]);
+      setApplicantName("");
     }
   }, [userId, selectedSlots.length]);
 
@@ -431,6 +435,11 @@ export default function BookingCalendar({
             <h3 className="text-sm font-medium text-on-background mb-2">
               {UTILIZERS_LABEL}
             </h3>
+            {applicantName && (
+              <p className="text-sm text-on-background/70 mb-2">
+                申請者・登録者: {applicantName}
+              </p>
+            )}
             <p className="text-xs text-on-background/60 mb-2">
               {UTILIZERS_DESCRIPTION}
             </p>

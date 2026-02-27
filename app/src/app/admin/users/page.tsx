@@ -8,7 +8,7 @@ import {
 } from "@/lib/supabase";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Search, AlertTriangle } from "lucide-react";
+import { Search } from "lucide-react";
 
 export default function AdminUsersPage() {
   const [profiles, setProfiles] = useState<ProfileWithReservationCount[]>([]);
@@ -20,6 +20,8 @@ export default function AdminUsersPage() {
     const load = async () => {
       try {
         setLoading(true);
+        // auth/profiles 不整合を自動修正（バックグラウンド）
+        fetch("/api/admin/auth-mismatch", { method: "POST" }).catch(() => {});
         const data = await getProfilesWithReservationCount();
         setProfiles(data);
         setFiltered(data);
@@ -58,15 +60,8 @@ export default function AdminUsersPage() {
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-primary">ユーザー一覧</h1>
-        <Link
-          href="/admin/users/mismatch"
-          className="text-sm text-highlight hover:underline flex items-center gap-1"
-        >
-          <AlertTriangle className="w-4 h-4" />
-          auth/profiles 不整合確認
-        </Link>
       </div>
 
       <div className="mb-6 flex gap-4 items-center">

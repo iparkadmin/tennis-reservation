@@ -20,7 +20,7 @@
 | `/admin` | `app/admin/page.tsx` | ✅ 管理画面ダッシュボード（要管理者ログイン） |
 | `/admin/users` | `app/admin/users/page.tsx` | ✅ ユーザー一覧・検索 |
 | `/admin/users/[id]` | `app/admin/users/[id]/page.tsx` | ✅ ユーザー詳細・運営メモ・予約代行作成 |
-| `/admin/users/mismatch` | `app/admin/users/mismatch/page.tsx` | ✅ auth/profiles 不整合確認 |
+| auth/profiles 不整合 | ユーザー一覧表示時に API で自動作成 |
 | `/admin/reservations` | `app/admin/reservations/page.tsx` | ✅ 予約一覧・フィルター |
 | `/admin/reservations/[id]` | `app/admin/reservations/[id]/page.tsx` | ✅ 予約詳細・代理キャンセル |
 | `/admin/calendar` | `app/admin/calendar/page.tsx` | ✅ 予約カレンダー（管理用） |
@@ -162,7 +162,7 @@
 |------|------|
 | 認可 | Middleware で `profiles.role = 'admin'` をチェック。未ログインは `/login?redirect=/admin` へ |
 | ダッシュボード | ユーザー数・予約数・直近予約のサマリー |
-| ユーザー一覧 | 検索（氏名・カナ・メール）、予約件数表示、auth/profiles 不整合リンク |
+| ユーザー一覧 | 検索（氏名・カナ・メール）、予約件数表示、auth/profiles 不整合の自動作成 |
 | ユーザー詳細 | プロフィール・予約履歴・利用者（追加・編集・削除）・運営メモ・予約代行作成 |
 | 予約一覧 | 日付・コートでフィルター、ユーザー名・予約番号・連絡事項表示 |
 | 予約詳細 | 代理キャンセル、予約変更（会員画面へリンク） |

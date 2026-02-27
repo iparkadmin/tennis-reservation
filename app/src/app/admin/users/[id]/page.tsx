@@ -193,6 +193,11 @@ export default function AdminUserDetailPage() {
 
       <div className="card mb-6">
         <h2 className="text-lg font-bold text-primary mb-4">登録利用者（家族・友人など）</h2>
+        {profile?.full_name && (
+          <p className="text-sm text-on-background/70 mb-3">
+            申請者・登録者: {profile.full_name}
+          </p>
+        )}
         <div className="space-y-3">
           {utilizers.map((u) => (
             <div key={u.id} className="flex items-center gap-2">

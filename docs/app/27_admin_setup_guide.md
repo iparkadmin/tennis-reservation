@@ -52,9 +52,9 @@ npm install
 | パス | 機能 |
 |------|------|
 | `/admin` | ダッシュボード（ユーザー数、予約数、直近の予約） |
-| `/admin/users` | ユーザー一覧（検索・ソート）、auth/profiles 不整合リンク |
+| `/admin/users` | ユーザー一覧（検索・ソート）、auth/profiles 不整合の自動作成 |
 | `/admin/users/[id]` | ユーザー詳細（プロフィール・予約・利用者・運営メモ・予約代行作成） |
-| `/admin/users/mismatch` | auth.users と profiles の不整合一覧 |
+| auth/profiles 不整合 | ユーザー一覧表示時に profiles を自動作成 |
 | `/admin/reservations` | 予約一覧（日付・コートでフィルター） |
 | `/admin/reservations/[id]` | 予約詳細（代理キャンセル・変更リンク） |
 | `/admin/calendar` | 予約カレンダー（全予約の俯瞰） |

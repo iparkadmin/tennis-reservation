@@ -45,6 +45,11 @@ export default function ReservationDetailPage() {
       setReservation(data);
       setSelectedDate(data.booking_date);
       setSelectedCourtId(data.court_id);
+      setSelectedTime(
+        data.start_time && data.end_time
+          ? { start: data.start_time.substring(0, 5), end: data.end_time.substring(0, 5) }
+          : null
+      );
       setEditUtilizers(
         (data.utilizers ?? []).map((u) => ({ id: u.id, full_name: u.full_name }))
       );
@@ -248,15 +253,20 @@ export default function ReservationDetailPage() {
                 {formatTime(reservation.start_time)} - {formatTime(reservation.end_time)}
               </span>
             </div>
-            {reservation.utilizers && reservation.utilizers.length > 0 && (
+            {(reservation.utilizers?.length ?? 0) > 0 && (
               <div className="flex items-start gap-3 pt-4 border-t border-outline/20">
                 <Users className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-on-background/70 mb-1">
                     {UTILIZERS_LABEL}
                   </p>
+                  {reservation.profile?.full_name && (
+                    <p className="text-xs text-on-background/60 mb-2">
+                      申請者・登録者: {reservation.profile.full_name}
+                    </p>
+                  )}
                   <ul className="space-y-1">
-                    {reservation.utilizers.map((u) => (
+                    {reservation.utilizers!.map((u) => (
                       <li key={u.id} className="text-on-background">
                         {u.full_name}
                       </li>
@@ -356,6 +366,11 @@ export default function ReservationDetailPage() {
               <h3 className="text-lg font-bold text-primary mb-2">
                 {UTILIZERS_LABEL}
               </h3>
+              {reservation.profile?.full_name && (
+                <p className="text-sm text-on-background/70 mb-2">
+                  申請者・登録者: {reservation.profile.full_name}
+                </p>
+              )}
               <p className="text-xs text-on-background/60 mb-3">
                 {UTILIZERS_DESCRIPTION}
               </p>

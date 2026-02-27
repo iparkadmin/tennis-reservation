@@ -140,8 +140,11 @@ export async function getReservationById(reservationId: string): Promise<Reserva
     console.error('Error fetching reservation:', error)
     return null
   }
-  const utilizers = await getReservationUtilizers(reservationId)
-  return { ...data, utilizers }
+  const [utilizers, applicantProfile] = await Promise.all([
+    getReservationUtilizers(reservationId),
+    data?.user_id ? getProfile(data.user_id) : null,
+  ])
+  return { ...data, utilizers, profile: applicantProfile ?? undefined }
 }
 
 /** 予約に紐づく利用者一覧を取得 */
