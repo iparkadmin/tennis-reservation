@@ -78,3 +78,13 @@ git push origin main
 ```
 
 push 後、Vercel が自動でビルドを開始します。**Deployments** で進行状況を確認してください。
+
+---
+
+## デプロイが自動で走らない場合
+
+詳細は [vercel_deploy_trigger.md](./vercel_deploy_trigger.md) を参照。主な対処:
+
+1. **Git 連携の再接続**: Settings → Git で Disconnect → 再接続
+2. **Deploy Hook**: Settings → Git → Deploy Hooks で URL を作成し、`Invoke-WebRequest -Uri "URL" -Method POST` で手動トリガー
+3. **手動 Redeploy**: Deployments → 最新の ︙ → Redeploy
