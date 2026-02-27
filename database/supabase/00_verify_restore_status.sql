@@ -2,19 +2,19 @@
 -- Supabase 復元状況の検証用 SQL
 -- ===========================================
 -- Supabase Dashboard > SQL Editor で実行してください
--- 結果を確認し、不足があれば SUPABASE_RESTORE_CHECKLIST.md に従って復元する
+-- 結果を確認し、不足があれば 00_full_setup_fresh.sql または migrations で復元する
 
 -- ===========================================
--- 1. テーブル存在確認（期待: audit_logs, courts, profiles, reservations）
+-- 1. テーブル存在確認
 -- ===========================================
 SELECT '1. TABLES' AS check_section, table_name AS result
 FROM information_schema.tables
 WHERE table_schema = 'public'
-  AND table_name IN ('profiles', 'courts', 'reservations', 'audit_logs')
+  AND table_name IN ('profiles', 'courts', 'reservations', 'audit_logs', 'utilizers', 'reservation_utilizers', 'admin_notes')
 ORDER BY table_name;
 
 -- ===========================================
--- 2. profiles カラム確認（phone が無いことが正）
+-- 2. profiles カラム確認（phone が無いこと、role, is_blocked があること）
 -- ===========================================
 SELECT '2. PROFILES_COLUMNS' AS check_section, column_name AS result
 FROM information_schema.columns
@@ -28,7 +28,7 @@ SELECT '3. POLICIES' AS check_section,
   tablename || ': ' || policyname || ' (' || cmd || ')' AS result
 FROM pg_policies
 WHERE schemaname = 'public'
-  AND tablename IN ('profiles', 'reservations', 'courts', 'audit_logs')
+  AND tablename IN ('profiles', 'reservations', 'courts', 'audit_logs', 'utilizers', 'reservation_utilizers', 'admin_notes')
 ORDER BY tablename, policyname;
 
 -- ===========================================
@@ -40,7 +40,8 @@ FROM pg_trigger
 WHERE tgrelid IN (
     'public.profiles'::regclass,
     'auth.users'::regclass,
-    'public.reservations'::regclass
+    'public.reservations'::regclass,
+    'public.utilizers'::regclass
   )
   AND NOT tgisinternal
 ORDER BY tgrelid::regclass::text, tgname;
@@ -51,7 +52,7 @@ ORDER BY tgrelid::regclass::text, tgname;
 SELECT '5. FUNCTIONS' AS check_section, routine_name AS result
 FROM information_schema.routines
 WHERE routine_schema = 'public'
-  AND routine_name IN ('handle_new_user', 'check_daily_limit', 'log_reservation_changes', 'create_missing_profiles')
+  AND routine_name IN ('handle_new_user', 'check_daily_limit', 'log_reservation_changes', 'log_utilizer_changes', 'create_missing_profiles', 'is_admin', 'is_blocked_user')
 ORDER BY routine_name;
 
 -- ===========================================
