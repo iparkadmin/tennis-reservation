@@ -1,4 +1,4 @@
-import { format, isWeekend as dateFnsIsWeekend, parseISO, subDays, addMonths, setHours, setMinutes, setSeconds, startOfDay, isBefore, isAfter } from "date-fns";
+import { format, isWeekend as dateFnsIsWeekend, parseISO, subDays, addDays, setHours, setMinutes, setSeconds, startOfDay, isBefore, isAfter } from "date-fns";
 import { ja } from "date-fns/locale/ja";
 
 // 日本の祝日リスト（2025年〜2027年）
@@ -68,16 +68,16 @@ export function isHoliday(date: Date | string): boolean {
   return HOLIDAYS.includes(dateStr);
 }
 
-/** 予約可能期間：今日から何か月先までか */
-export const BOOKABLE_PERIOD_MONTHS = 1;
+/** 予約可能期間：今日から何日先までか */
+export const BOOKABLE_PERIOD_DAYS = 30;
 
-/** 予約可能期間の最終日（今日 + BOOKABLE_PERIOD_MONTHS） */
+/** 予約可能期間の最終日（今日 + BOOKABLE_PERIOD_DAYS） */
 export function getMaxBookableDate(referenceDate: Date = new Date()): Date {
   const today = startOfDay(referenceDate);
-  return addMonths(today, BOOKABLE_PERIOD_MONTHS);
+  return addDays(today, BOOKABLE_PERIOD_DAYS);
 }
 
-/** 日付が予約可能期間内か（今日〜1か月以内） */
+/** 日付が予約可能期間内か（今日〜30日以内） */
 export function isWithinBookablePeriod(date: Date | string, referenceDate: Date = new Date()): boolean {
   const dateObj = typeof date === "string" ? parseISO(date) : date;
   const today = startOfDay(referenceDate);
@@ -92,7 +92,7 @@ export function isBookableDate(date: Date | string, referenceDate: Date = new Da
 
   // 過去の日付は予約不可
   if (isBefore(dateObj, today)) return false;
-  // 1か月を超える将来日は予約不可
+  // 30日を超える将来日は予約不可
   if (isAfter(dateObj, maxDate)) return false;
   // 土日祝のみ予約可能
   return isWeekend(date) || isHoliday(date);

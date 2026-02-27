@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 export default function Footer() {
   return (
     <footer className="w-full py-4 px-4 text-left border-t border-outline/20 bg-surface/50">
@@ -10,12 +8,14 @@ export default function Footer() {
           運営会社 iPark Institute Co., Ltd.
         </p>
         <div className="flex items-center gap-4">
-          <Link
-            href="/privacy-policy"
+          <a
+            href="https://www.shonan-ipark.com/privacy-policy/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-sm text-primary-accent hover:underline font-medium"
           >
             プライバシーポリシー
-          </Link>
+          </a>
           <a
             href="/admin/login"
             className="text-sm text-on-background/50 hover:text-on-background/70 hover:underline"

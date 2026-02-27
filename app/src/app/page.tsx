@@ -126,7 +126,7 @@ export default function Home() {
           <ul className="space-y-2 text-on-background/80">
             <li className="flex items-start gap-2">
               <span className="text-primary-accent">•</span>
-              予約可能日：土曜・日曜・祝日のみ（今日から1か月以内）
+              予約可能日：土曜・日曜・祝日のみ（今日から30日以内）
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary-accent">•</span>

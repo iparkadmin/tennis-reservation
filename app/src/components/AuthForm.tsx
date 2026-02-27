@@ -544,9 +544,9 @@ export default function AuthForm({ redirectTo }: AuthFormProps) {
                 required
               />
               <label htmlFor="privacy-accept" className="text-sm text-on-background cursor-pointer">
-                <Link href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary-accent hover:underline font-medium">
+                <a href="https://www.shonan-ipark.com/privacy-policy/" target="_blank" rel="noopener noreferrer" className="text-primary-accent hover:underline font-medium">
                   プライバシーポリシー
-                </Link>
+                </a>
                 に同意します <span className="text-highlight">*</span>
               </label>
             </div>

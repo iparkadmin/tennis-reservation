@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import AdminLoginForm from "@/components/AdminLoginForm";
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 function AdminLoginContent() {
@@ -50,9 +49,9 @@ function AdminLoginContent() {
         </div>
         <AdminLoginForm redirectTo={redirectTo} />
         <p className="mt-6 text-center text-sm text-on-background/60">
-          <Link href="/admin" className="text-primary hover:underline">
-            管理者トップページへ
-          </Link>
+          <span className="text-on-background/60">
+            ログイン後に管理者トップへアクセスできます
+          </span>
         </p>
       </div>
     </div>

@@ -395,7 +395,7 @@ export default function AdminUserDetailPage() {
                   return;
                 }
                 if (!isWithinBookablePeriod(createDate)) {
-                  alert("予約可能期間は今日から1か月以内です");
+                  alert("予約可能期間は今日から30日以内です");
                   return;
                 }
                 if (!isBookableDate(createDate)) {

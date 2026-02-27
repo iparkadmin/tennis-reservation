@@ -110,7 +110,7 @@ export default function DashboardPage() {
             予約カレンダー
           </h2>
           <p className="text-on-background/70">
-            土曜・日曜・祝日のみ、今日から1か月以内が予約可能です。
+            土曜・日曜・祝日のみ、今日から30日以内が予約可能です。
             <br />
             時間枠は9時ー11時、11時ー13時、13時ー15時、15時ー17時の2時間単位。
             <br />
