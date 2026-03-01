@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { getUserReservations, cancelReservation, type Reservation } from "@/lib/supabase";
 import Header from "@/components/Header";
 import { formatDate, formatTime, canModifyReservation } from "@/lib/dateUtils";
-import { NOTICE_ITEMS } from "@/lib/constants";
+import { NOTICE_ITEMS, NOTICE_TITLE } from "@/lib/constants";
 import Link from "next/link";
 import { Calendar, Clock, Trash2, Edit, Eye, AlertTriangle } from "lucide-react";
 
@@ -279,7 +279,7 @@ export default function ReservationsPage() {
         )}
 
         <div className="mt-8 pt-6 border-t border-outline/20 text-left">
-          <h3 className="text-sm font-bold text-primary mb-2">注意事項</h3>
+          <h3 className="text-sm font-bold text-primary mb-2">{NOTICE_TITLE}</h3>
           <ul className="space-y-1 text-sm text-primary">
             {NOTICE_ITEMS.map((item, index) => (
               <li key={index} className="flex items-start gap-2">
