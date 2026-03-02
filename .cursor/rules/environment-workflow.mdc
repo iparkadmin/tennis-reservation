@@ -1,0 +1,44 @@
+---
+description: tennis-reservation 環境別作業のデフォルトと指示の解釈
+alwaysApply: true
+---
+
+# 環境別作業ルール（tennis-reservation）
+
+## 運用方針
+
+**作業前に本ルールを確認し、対象環境を間違えないこと。**
+
+- 指示に環境の指定がない → **コピー環境**
+- 「元環境で」「元環境に」などと明示 → **元環境**
+
+## 元環境
+
+| サービス | URL |
+|----------|-----|
+| GitHub | https://github.com/TatsuhitoDT/vault |
+| Supabase | https://supabase.com/dashboard/org/dfiufvdhbtaitktitzwh |
+| Vercel | https://vercel.com/mtatsuhito-gmailcoms-projects |
+
+- リポジトリ: vault モノレポ内の tennis-reservation
+
+## コピー環境
+
+| サービス | URL |
+|----------|-----|
+| GitHub | https://github.com/iparkadmin |
+| Supabase | https://supabase.com/dashboard/org/qtgzpqlzgojkjwsigvww |
+| Vercel | https://vercel.com/muramatsus-projects |
+
+- リポジトリ: iparkadmin/tennis-reservation（単独）
+
+## 明示的指定
+
+- **「元環境で」「元環境に」「元環境を」** → 元環境向けの作業（上記 URL を参照）
+- **「コピー環境で」「両方」** → その通り解釈
+
+## 適用対象
+
+- Vercel: プロジェクト設定、環境変数、デプロイ
+- Supabase: マイグレーション実行、Auth、メールテンプレート
+- Git: 元環境は vault へ push、コピー環境は iparkadmin/tennis-reservation へ push

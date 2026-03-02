@@ -2,7 +2,17 @@
 
 完全無料のテニスコート予約システム。会員登録必須（セキュリティ強化のためゲスト予約は廃止）。コート2面（コートA・コートB）の予約管理に対応。
 
-アプリURL：　https://tennis-reservation-one.vercel.app/login
+アプリURL：　https://tennis-reservation-five.vercel.app/login
+
+### 環境一覧（作業前確認・間違い防止）
+
+| 環境 | GitHub | Supabase | Vercel |
+|------|--------|----------|--------|
+| **元環境** | [TatsuhitoDT/vault](https://github.com/TatsuhitoDT/vault) | [org/dfiufvdhbtaitktitzwh](https://supabase.com/dashboard/org/dfiufvdhbtaitktitzwh) | [mtatsuhito-gmailcoms-projects](https://vercel.com/mtatsuhito-gmailcoms-projects) |
+| **コピー環境** | [iparkadmin](https://github.com/iparkadmin) | [org/qtgzpqlzgojkjwsigvww](https://supabase.com/dashboard/org/qtgzpqlzgojkjwsigvww) | [muramatsus-projects](https://vercel.com/muramatsus-projects) |
+
+- 通常は**コピー環境**を更新。元環境への変更は「元環境で」と明示する。
+- 詳細: `docs/deployment/ENVIRONMENT_WORKFLOW_RULE.md`
 
 ---
 

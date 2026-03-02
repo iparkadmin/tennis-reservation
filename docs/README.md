@@ -85,6 +85,16 @@
 - **[deployment/GIT_VERCEL_DEPLOY.md](./deployment/GIT_VERCEL_DEPLOY.md)** / **[VERCEL_DEPLOY_STEPS.md](./deployment/VERCEL_DEPLOY_STEPS.md)**
   - 即座にVercelにデプロイするためのクイックガイド
 
+- **[deployment/ENVIRONMENT_WORKFLOW_RULE.md](./deployment/ENVIRONMENT_WORKFLOW_RULE.md)** ※AI・開発者向け
+  - 元環境・コピー環境の作業対象ルール
+  - 通常はコピー環境を更新、元環境は明示的に指定
+
+- **[deployment/VERCEL_IMPORT_SETUP.md](./deployment/VERCEL_IMPORT_SETUP.md)**
+  - 単独リポジトリでの Vercel インポート・デプロイ設定
+
+- **[deployment/ENVIRONMENT_MIGRATION_CHECKLIST.md](./deployment/ENVIRONMENT_MIGRATION_CHECKLIST.md)**
+  - 環境1→環境2 完全引越しチェックリスト
+
 ---
 
 ## 🗄️ データベース関連
