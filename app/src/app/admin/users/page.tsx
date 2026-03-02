@@ -8,7 +8,7 @@ import {
 } from "@/lib/supabase";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Search } from "lucide-react";
+import { Search, Shield } from "lucide-react";
 
 export default function AdminUsersPage() {
   const [profiles, setProfiles] = useState<ProfileWithReservationCount[]>([]);
@@ -89,6 +89,7 @@ export default function AdminUsersPage() {
                 <th className="text-left py-3 px-4">氏名（カナ）</th>
                 <th className="text-left py-3 px-4">メール</th>
                 <th className="text-left py-3 px-4">予約件数</th>
+                <th className="text-left py-3 px-4">権限</th>
                 <th className="text-left py-3 px-4">状態</th>
                 <th className="text-left py-3 px-4">登録日</th>
                 <th className="text-left py-3 px-4"></th>
@@ -101,6 +102,16 @@ export default function AdminUsersPage() {
                   <td className="py-3 px-4">{p.full_name_kana || "-"}</td>
                   <td className="py-3 px-4">{p.email || "-"}</td>
                   <td className="py-3 px-4">{p.reservation_count ?? 0}</td>
+                  <td className="py-3 px-4">
+                    {p.role === "admin" ? (
+                      <span className="inline-flex items-center gap-1 text-primary">
+                        <Shield className="w-4 h-4" />
+                        管理者
+                      </span>
+                    ) : (
+                      <span className="text-on-background/70">一般</span>
+                    )}
+                  </td>
                   <td className="py-3 px-4">
                     {p.is_blocked ? (
                       <span className="text-highlight font-medium">ブロック中</span>

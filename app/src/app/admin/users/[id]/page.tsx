@@ -16,6 +16,7 @@ import {
   updateUtilizer,
   deleteUtilizer,
   updateProfile,
+  cancelReservation,
   type Profile,
   type Reservation,
   type Utilizer,
@@ -32,7 +33,7 @@ import {
 } from "@/lib/dateUtils";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { ArrowLeft, Plus, Pencil, Trash2, Ban, UserCheck } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, Trash2, Ban, UserCheck, Shield, ShieldOff, X } from "lucide-react";
 
 type AdminNote = { id: string; content: string; created_at: string; author_id: string };
 
@@ -59,6 +60,12 @@ export default function AdminUserDetailPage() {
   const [newUtilizerName, setNewUtilizerName] = useState("");
   const [savingUtilizer, setSavingUtilizer] = useState(false);
   const [togglingBlock, setTogglingBlock] = useState(false);
+  const [togglingRole, setTogglingRole] = useState(false);
+  const [editingProfileField, setEditingProfileField] = useState<"full_name" | "full_name_kana" | null>(null);
+  const [editProfileName, setEditProfileName] = useState("");
+  const [editProfileKana, setEditProfileKana] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [cancellingReservationId, setCancellingReservationId] = useState<string | null>(null);
 
   const loadData = async (showLoading = true) => {
     try {
@@ -128,39 +135,72 @@ export default function AdminUserDetailPage() {
       <h1 className="text-2xl font-bold text-primary mb-6">ユーザー詳細</h1>
 
       <div className="card mb-6">
-        <div className="flex items-center justify-between mb-4">
-<h2 className="text-lg font-bold text-primary">プロフィール</h2>
-          {currentUserId !== userId && (
-            <button
-              onClick={async () => {
-                const blocked = !profile.is_blocked;
-                const action = blocked ? "ブロック" : "ブロック解除";
-                if (!confirm(`${profile.full_name || "このユーザー"}を${action}しますか？`)) return;
-                setTogglingBlock(true);
-                const ok = await updateProfile(userId, { is_blocked: blocked });
-                if (ok) await loadData(false);
-                setTogglingBlock(false);
-              }}
-              disabled={togglingBlock}
-              className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg ${
-                profile.is_blocked
-                  ? "bg-primary/20 text-primary hover:bg-primary/30"
-                  : "bg-highlight/20 text-highlight hover:bg-highlight/30"
-              }`}
-            >
-              {profile.is_blocked ? (
-                <>
-                  <UserCheck className="w-4 h-4" />
-                  {togglingBlock ? "解除中..." : "ブロック解除"}
-                </>
-              ) : (
-                <>
-                  <Ban className="w-4 h-4" />
-                  {togglingBlock ? "ブロック中..." : "ブロック"}
-                </>
-              )}
-            </button>
-          )}
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <h2 className="text-lg font-bold text-primary">プロフィール</h2>
+          <div className="flex items-center gap-2">
+            {currentUserId !== userId && (
+              <>
+                <button
+                  onClick={async () => {
+                    const blocked = !profile.is_blocked;
+                    const action = blocked ? "ブロック" : "ブロック解除";
+                    if (!confirm(`${profile.full_name || "このユーザー"}を${action}しますか？`)) return;
+                    setTogglingBlock(true);
+                    const ok = await updateProfile(userId, { is_blocked: blocked });
+                    if (ok) await loadData(false);
+                    setTogglingBlock(false);
+                  }}
+                  disabled={togglingBlock}
+                  className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg ${
+                    profile.is_blocked
+                      ? "bg-primary/20 text-primary hover:bg-primary/30"
+                      : "bg-highlight/20 text-highlight hover:bg-highlight/30"
+                  }`}
+                >
+                  {profile.is_blocked ? (
+                    <>
+                      <UserCheck className="w-4 h-4" />
+                      {togglingBlock ? "解除中..." : "ブロック解除"}
+                    </>
+                  ) : (
+                    <>
+                      <Ban className="w-4 h-4" />
+                      {togglingBlock ? "ブロック中..." : "ブロック"}
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={async () => {
+                    const newRole = profile.role === "admin" ? "user" : "admin";
+                    const action = newRole === "admin" ? "管理者に昇格" : "管理者権限を解除";
+                    if (!confirm(`${profile.full_name || "このユーザー"}を${action}しますか？`)) return;
+                    setTogglingRole(true);
+                    const ok = await updateProfile(userId, { role: newRole });
+                    if (ok) await loadData(false);
+                    setTogglingRole(false);
+                  }}
+                  disabled={togglingRole}
+                  className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded-lg ${
+                    profile.role === "admin"
+                      ? "bg-primary/20 text-primary hover:bg-primary/30"
+                      : "bg-on-background/10 text-on-background hover:bg-on-background/20"
+                  }`}
+                >
+                  {profile.role === "admin" ? (
+                    <>
+                      <ShieldOff className="w-4 h-4" />
+                      {togglingRole ? "解除中..." : "管理者解除"}
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="w-4 h-4" />
+                      {togglingRole ? "昇格中..." : "管理者に昇格"}
+                    </>
+                  )}
+                </button>
+              </>
+            )}
+          </div>
         </div>
         {profile.is_blocked && (
           <div className="mb-4 p-3 rounded-lg bg-highlight/10 border border-highlight/30 text-highlight text-sm">
@@ -170,15 +210,130 @@ export default function AdminUserDetailPage() {
         <dl className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <dt className="text-sm text-on-background/70">氏名</dt>
-            <dd className="font-medium">{profile.full_name || "-"}</dd>
+            <dd className="font-medium flex items-center gap-2">
+              {editingProfileField === "full_name" ? (
+                <>
+                  <input
+                    type="text"
+                    value={editProfileName}
+                    onChange={(e) => setEditProfileName(e.target.value)}
+                    className="input flex-1 max-w-[200px]"
+                    placeholder="氏名"
+                    autoFocus
+                  />
+                  <button
+                    onClick={async () => {
+                      setSavingProfile(true);
+                      const ok = await updateProfile(userId, { full_name: editProfileName.trim() || "" });
+                      if (ok) {
+                        setProfile((p) => (p ? { ...p, full_name: editProfileName.trim() || "" } : null));
+                        setEditingProfileField(null);
+                      }
+                      setSavingProfile(false);
+                    }}
+                    disabled={savingProfile}
+                    className="btn-primary text-sm"
+                  >
+                    保存
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingProfileField(null);
+                      setEditProfileName(profile.full_name || "");
+                    }}
+                    disabled={savingProfile}
+                    className="btn-secondary text-sm"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  {profile.full_name || "-"}
+                  <button
+                    onClick={() => {
+                      setEditingProfileField("full_name");
+                      setEditProfileName(profile.full_name || "");
+                    }}
+                    className="text-primary hover:underline text-sm"
+                  >
+                    <Pencil className="w-4 h-4 inline" />
+                  </button>
+                </>
+              )}
+            </dd>
           </div>
           <div>
             <dt className="text-sm text-on-background/70">氏名（カナ）</dt>
-            <dd className="font-medium">{profile.full_name_kana || "-"}</dd>
+            <dd className="font-medium flex items-center gap-2">
+              {editingProfileField === "full_name_kana" ? (
+                <>
+                  <input
+                    type="text"
+                    value={editProfileKana}
+                    onChange={(e) => setEditProfileKana(e.target.value)}
+                    className="input flex-1 max-w-[200px]"
+                    placeholder="氏名（カナ）"
+                    autoFocus
+                  />
+                  <button
+                    onClick={async () => {
+                      setSavingProfile(true);
+                      const ok = await updateProfile(userId, { full_name_kana: editProfileKana.trim() || "" });
+                      if (ok) {
+                        setProfile((p) => (p ? { ...p, full_name_kana: editProfileKana.trim() || "" } : null));
+                        setEditingProfileField(null);
+                      }
+                      setSavingProfile(false);
+                    }}
+                    disabled={savingProfile}
+                    className="btn-primary text-sm"
+                  >
+                    保存
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingProfileField(null);
+                      setEditProfileKana(profile.full_name_kana || "");
+                    }}
+                    disabled={savingProfile}
+                    className="btn-secondary text-sm"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  {profile.full_name_kana || "-"}
+                  <button
+                    onClick={() => {
+                      setEditingProfileField("full_name_kana");
+                      setEditProfileKana(profile.full_name_kana || "");
+                    }}
+                    className="text-primary hover:underline text-sm"
+                  >
+                    <Pencil className="w-4 h-4 inline" />
+                  </button>
+                </>
+              )}
+            </dd>
           </div>
           <div>
             <dt className="text-sm text-on-background/70">メール</dt>
             <dd className="font-medium">{profile.email || "-"}</dd>
+          </div>
+          <div>
+            <dt className="text-sm text-on-background/70">権限</dt>
+            <dd className="font-medium">
+              {profile.role === "admin" ? (
+                <span className="inline-flex items-center gap-1 text-primary">
+                  <Shield className="w-4 h-4" />
+                  管理者
+                </span>
+              ) : (
+                "一般ユーザー"
+              )}
+            </dd>
           </div>
           <div>
             <dt className="text-sm text-on-background/70">登録日</dt>
@@ -452,12 +607,28 @@ export default function AdminUserDetailPage() {
                     </td>
                     <td className="py-2 px-3 font-mono text-xs">{r.reservation_number ?? "-"}</td>
                     <td className="py-2 px-3">
-                      <Link
-                        href={`/admin/reservations/${r.id}`}
-                        className="text-primary hover:underline"
-                      >
-                        詳細
-                      </Link>
+                      <span className="inline-flex items-center gap-2">
+                        <Link
+                          href={`/admin/reservations/${r.id}`}
+                          className="text-primary hover:underline"
+                        >
+                          詳細
+                        </Link>
+                        <button
+                          onClick={async () => {
+                            if (!confirm("この予約をキャンセルしますか？\n\nこの操作は取り消せません。")) return;
+                            setCancellingReservationId(r.id);
+                            const ok = await cancelReservation(r.id);
+                            if (ok) await loadData(false);
+                            else alert("キャンセルに失敗しました");
+                            setCancellingReservationId(null);
+                          }}
+                          disabled={cancellingReservationId === r.id}
+                          className="text-highlight hover:underline text-sm disabled:opacity-50"
+                        >
+                          {cancellingReservationId === r.id ? "キャンセル中..." : "キャンセル"}
+                        </button>
+                      </span>
                     </td>
                   </tr>
                 ))}
