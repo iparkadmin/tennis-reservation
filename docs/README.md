@@ -95,6 +95,10 @@
 - **[deployment/ENVIRONMENT_MIGRATION_CHECKLIST.md](./deployment/ENVIRONMENT_MIGRATION_CHECKLIST.md)**
   - 環境1→環境2 完全引越しチェックリスト
 
+- **[deployment/15_supabase_keep_alive_setup.md](./deployment/15_supabase_keep_alive_setup.md)**
+  - Supabase 無料プランのポーズ防止（Keep Alive）セットアップ
+  - GitHub Actions で週2回 DB へ ping を送り、7日間のアクティビティ維持
+
 ---
 
 ## 🗄️ データベース関連
