@@ -8,17 +8,42 @@ Supabase 無料プランでは、**7日間アクティビティがない**とプ
 
 ## Push 手順（デフォルト: iparkadmin を先に）
 
-vault モノレポから iparkadmin へ push する場合（要約: iparkadmin を先に push）：
+### 方法 A: .env.git.local を使う（推奨）
+
+PAT をローカルに保存し、スクリプトで利用する方法です。
+
+1. **認証情報ファイルの作成**
+   ```powershell
+   copy vault\.env.git.example vault\.env.git.local
+   ```
+   `vault/.env.git.local` を編集し、`GITHUB_USERNAME` と `GITHUB_PAT` を設定（`.env.git.local` は `.gitignore` で除外済み）
+
+2. **スクリプトで push**
+   ```powershell
+   cd vault\tennis-reservation\scripts
+   .\push-iparkadmin.ps1
+   ```
+
+3. **続けて vault へ push する場合**
+   ```powershell
+   cd c:\Dev
+   git push origin main
+   ```
+
+### 方法 B: 手動で subtree push
 
 ```powershell
 cd c:\Dev
-# iparkadmin へ subtree push（約2分かかります）
 git subtree push --prefix=vault/tennis-reservation iparkadmin main
 # 続けて vault へ push する場合
 git push origin main
 ```
 
 ※ 初回は `git remote add iparkadmin https://github.com/iparkadmin/tennis-reservation.git` が必要
+
+---
+
+**注意**: `.github/workflows/` を含む push には、PAT に **workflow** スコープが必要です。GitHub → Settings → Developer settings → Personal access tokens で、対象トークンに `workflow` を付与してください。
 
 ---
 
