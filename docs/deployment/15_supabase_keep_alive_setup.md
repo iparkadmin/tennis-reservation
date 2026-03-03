@@ -82,6 +82,15 @@ git push origin main
 | `SUPABASE_URL` | Project URL（`https://xxxx.supabase.co`） | Supabase ダッシュボード → Settings → API |
 | `SUPABASE_ANON_KEY` | anon (public) キー | 同上 |
 
+#### 元環境も iparkadmin から一括実行する場合
+
+iparkadmin リポジトリに以下を追加すると、**コピー環境・元環境の両方**に ping を送れます。
+
+| Secret 名 | 値 | 取得元 |
+|-----------|-----|--------|
+| `TENNIS_ORIGIN_SUPABASE_URL` | 元環境の Project URL | Supabase ダッシュボード（org/dfiufvdhbtaitktitzwh）→ Settings → API |
+| `TENNIS_ORIGIN_SUPABASE_ANON_KEY` | 元環境の anon キー | 同上 |
+
 ### Step 3: コピー環境（iparkadmin）でワークフローを利用する場合
 
 コピー環境は **iparkadmin/tennis-reservation** という**別リポジトリ**です。次のいずれかが必要です。

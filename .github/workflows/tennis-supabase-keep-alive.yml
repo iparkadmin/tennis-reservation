@@ -10,14 +10,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  keep-alive:
-    name: Keep alive
+  keep-alive-copy:
+    name: Keep alive (Copy)
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase
+      - name: Ping Supabase (Copy)
         run: |
           if [ -z "${{ secrets.SUPABASE_URL }}" ] || [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
-            echo "Error: SUPABASE_URL and SUPABASE_ANON_KEY secrets are required."
+            echo "Error: SUPABASE_URL and SUPABASE_ANON_KEY secrets are required for Copy env."
             exit 1
           fi
           curl -fsS -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/reservations?select=id&limit=1" \
@@ -25,4 +25,21 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Accept: application/json" \
             -H "Prefer: count=exact"
-          echo "Keep-alive succeeded"
+          echo "Keep-alive succeeded (Copy)"
+
+  keep-alive-origin:
+    name: Keep alive (Origin)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase (Origin)
+        run: |
+          if [ -z "${{ secrets.TENNIS_ORIGIN_SUPABASE_URL }}" ] || [ -z "${{ secrets.TENNIS_ORIGIN_SUPABASE_ANON_KEY }}" ]; then
+            echo "Skipping: TENNIS_ORIGIN_SUPABASE_URL and TENNIS_ORIGIN_SUPABASE_ANON_KEY are required for Origin env."
+            exit 0
+          fi
+          curl -fsS -X GET "${{ secrets.TENNIS_ORIGIN_SUPABASE_URL }}/rest/v1/reservations?select=id&limit=1" \
+            -H "apikey: ${{ secrets.TENNIS_ORIGIN_SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.TENNIS_ORIGIN_SUPABASE_ANON_KEY }}" \
+            -H "Accept: application/json" \
+            -H "Prefer: count=exact"
+          echo "Keep-alive succeeded (Origin)"
