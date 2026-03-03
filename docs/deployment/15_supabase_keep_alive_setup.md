@@ -2,6 +2,24 @@
 
 Supabase 無料プランでは、**7日間アクティビティがない**とプロジェクトがポーズし、その後削除される可能性があります。このガイドでは、GitHub Actions で定期的に DB にアクセスし、ポーズを防ぐ仕組みのセットアップ方法を説明します。
 
+**デフォルト環境**: 通常は**コピー環境（iparkadmin）**を先に更新する。元環境の更新は明示的に指定する。
+
+---
+
+## Push 手順（デフォルト: iparkadmin を先に）
+
+vault モノレポから iparkadmin へ push する場合（要約: iparkadmin を先に push）：
+
+```powershell
+cd c:\Dev
+# iparkadmin へ subtree push（約2分かかります）
+git subtree push --prefix=vault/tennis-reservation iparkadmin main
+# 続けて vault へ push する場合
+git push origin main
+```
+
+※ 初回は `git remote add iparkadmin https://github.com/iparkadmin/tennis-reservation.git` が必要
+
 ---
 
 ## 概要
@@ -36,8 +54,8 @@ Supabase 無料プランでは、**7日間アクティビティがない**とプ
 
 | Secret 名 | 値 | 取得元 |
 |-----------|-----|--------|
-| `TENNIS_COPY_SUPABASE_URL` | Project URL（`https://xxxx.supabase.co`） | Supabase ダッシュボード → Settings → API |
-| `TENNIS_COPY_SUPABASE_ANON_KEY` | anon (public) キー | 同上 |
+| `SUPABASE_URL` | Project URL（`https://xxxx.supabase.co`） | Supabase ダッシュボード → Settings → API |
+| `SUPABASE_ANON_KEY` | anon (public) キー | 同上 |
 
 ### Step 3: コピー環境（iparkadmin）でワークフローを利用する場合
 
