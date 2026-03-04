@@ -9,33 +9,24 @@ export async function GET(
     const { id } = await params;
     const supabase = getAdminClient();
 
-    const { data: resData, error } = await supabase
+    const { data: resData, error: resError } = await supabase
       .from("reservations")
       .select("*, court:courts(*), profile:profiles(*), utilization_records(*)")
       .eq("id", id)
       .single();
 
-    if (error || !resData) {
+    if (resError || !resData) {
       return NextResponse.json({ error: "予約が見つかりません" }, { status: 404 });
     }
 
-    // 利用者（utilizers）を取得
     const { data: ruData } = await supabase
       .from("reservation_utilizers")
-      .select("utilizer_id")
+      .select("utilizers(id, full_name)")
       .eq("reservation_id", id);
-    const utilizerIds = (ruData ?? []).map((r) => r.utilizer_id);
-    let utilizers: { id: string; full_name: string }[] = [];
-    if (utilizerIds.length > 0) {
-      const { data: utilizersData } = await supabase
-        .from("utilizers")
-        .select("id, full_name")
-        .in("id", utilizerIds);
-      const orderMap = new Map(utilizerIds.map((uid, i) => [uid, i]));
-      utilizers = (utilizersData ?? []).sort(
-        (a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)
-      );
-    }
+
+    const utilizers = ((ruData || []) as { utilizers: { id: string; full_name: string } | null }[])
+      .map((ru) => ru.utilizers)
+      .filter((u): u is { id: string; full_name: string } => u != null);
 
     const r = resData as { profile: unknown; utilization_records: unknown };
     const ur = r.utilization_records;

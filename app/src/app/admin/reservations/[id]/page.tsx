@@ -143,74 +143,74 @@ export default function AdminReservationDetailPage() {
       <div className="card mb-6">
         <h2 className="text-lg font-bold text-primary mb-4">利用実績記録</h2>
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-on-background mb-2">利用有無</label>
-            <select
-              value={utilStatus}
-              onChange={(e) => setUtilStatus(e.target.value)}
-              className="input w-full max-w-xs"
-            >
-              {UTILIZATION_STATUS_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-on-background mb-2">マナー状況</label>
-            <select
-              value={mannersStatus}
-              onChange={(e) => setMannersStatus(e.target.value)}
-              className="input w-full max-w-xs"
-            >
-              {MANNERS_STATUS_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-on-background mb-2">メモ欄</label>
-            <textarea
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
-              className="input w-full min-h-[80px]"
-              placeholder="補足事項など"
-            />
-          </div>
-          <button
-            onClick={async () => {
-              try {
-                setSavingRecord(true);
-                await upsertUtilizationRecord(reservation.id, {
-                  utilizationStatus: utilStatus,
-                  mannersStatus,
-                  memo,
-                });
-                const data = await getReservationById(reservationId);
-                if (data) {
-                  setReservation(data as Reservation);
-                  const ur = (data as { utilization_record?: { utilization_status?: string; manners_status?: string; memo?: string } } | null)?.utilization_record;
-                  if (ur) {
-                    setUtilStatus(ur.utilization_status ?? "unrecorded");
-                    setMannersStatus(ur.manners_status ?? "no_violation");
-                    setMemo(ur.memo ?? "");
+              <div>
+                <label className="block text-sm font-medium text-on-background mb-2">利用有無</label>
+                <select
+                  value={utilStatus}
+                  onChange={(e) => setUtilStatus(e.target.value)}
+                  className="input w-full max-w-xs"
+                >
+                  {UTILIZATION_STATUS_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-on-background mb-2">マナー状況</label>
+                <select
+                  value={mannersStatus}
+                  onChange={(e) => setMannersStatus(e.target.value)}
+                  className="input w-full max-w-xs"
+                >
+                  {MANNERS_STATUS_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-on-background mb-2">メモ欄</label>
+                <textarea
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  className="input w-full min-h-[80px]"
+                  placeholder="補足事項など"
+                />
+              </div>
+              <button
+                onClick={async () => {
+                  try {
+                    setSavingRecord(true);
+                    await upsertUtilizationRecord(reservation.id, {
+                      utilizationStatus: utilStatus,
+                      mannersStatus,
+                      memo,
+                    });
+                    const data = await getReservationById(reservationId);
+                    if (data) {
+                      setReservation(data as Reservation);
+                      const ur = (data as { utilization_record?: { utilization_status?: string; manners_status?: string; memo?: string } } | null)?.utilization_record;
+                      if (ur) {
+                        setUtilStatus(ur.utilization_status ?? "unrecorded");
+                        setMannersStatus(ur.manners_status ?? "no_violation");
+                        setMemo(ur.memo ?? "");
+                      }
+                    }
+                  } catch (e: unknown) {
+                    alert((e as Error).message || "保存に失敗しました");
+                  } finally {
+                    setSavingRecord(false);
                   }
-                }
-              } catch (e: unknown) {
-                alert((e as Error).message || "保存に失敗しました");
-              } finally {
-                setSavingRecord(false);
-              }
-            }}
-            disabled={savingRecord}
-            className="btn-primary flex items-center gap-2"
-          >
-            <Save className="w-4 h-4" />
-            {savingRecord ? "保存中..." : "利用実績を保存"}
-          </button>
+                }}
+                disabled={savingRecord}
+                className="btn-primary flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {savingRecord ? "保存中..." : "利用実績を保存"}
+              </button>
         </div>
       </div>
 
