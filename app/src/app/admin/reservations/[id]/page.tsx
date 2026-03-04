@@ -10,7 +10,7 @@ import {
   type Reservation,
 } from "@/lib/supabase";
 import { formatDate, formatTime, canModifyReservation } from "@/lib/dateUtils";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Users } from "lucide-react";
 
 export default function AdminReservationDetailPage() {
   const params = useParams();
@@ -118,6 +118,22 @@ export default function AdminReservationDetailPage() {
           )}
         </dl>
       </div>
+
+      {(reservation.utilizers?.length ?? 0) > 0 && (
+        <div className="card mb-6">
+          <h2 className="text-lg font-bold text-primary mb-4">利用者（当日参加者）</h2>
+          <div className="flex items-start gap-3">
+            <Users className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+            <ul className="space-y-1">
+              {reservation.utilizers!.map((u) => (
+                <li key={u.id} className="text-on-background">
+                  {u.full_name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       <div className="card mb-6">
         <h2 className="text-lg font-bold text-primary mb-4">予約者</h2>
