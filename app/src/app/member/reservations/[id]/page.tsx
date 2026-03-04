@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { type Reservation, getCourts, type Court } from "@/lib/supabase";
 import Header from "@/components/Header";
 import { formatDate, formatTime, canModifyReservation } from "@/lib/dateUtils";
-import { NOTICE_DETAIL_LINK_TO_TOP, SAME_DAY_GUIDE_ITEMS } from "@/lib/constants";
+import { NOTICE_DETAIL_LINK_PREFIX, NOTICE_DETAIL_LINK_TEXT, SAME_DAY_GUIDE_ITEMS } from "@/lib/constants";
 import Link from "next/link";
 import { Calendar, Clock, Edit, Save, X, AlertTriangle, UserPlus, Users } from "lucide-react";
 import BookingCalendar from "@/components/BookingCalendar";
@@ -460,8 +460,11 @@ export default function ReservationDetailPage() {
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-sm text-primary font-medium">
-            <Link href="/">{NOTICE_DETAIL_LINK_TO_TOP}</Link>
+          <p className="mt-3 text-sm text-on-background/80">
+            {NOTICE_DETAIL_LINK_PREFIX}{" "}
+            <Link href="/" className="text-primary-accent underline font-medium hover:opacity-80">
+              {NOTICE_DETAIL_LINK_TEXT}
+            </Link>
           </p>
         </div>
       </main>

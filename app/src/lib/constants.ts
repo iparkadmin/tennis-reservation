@@ -57,11 +57,13 @@ export const TOP_PAGE_GUIDE_SECTIONS: { title: string; items: string[] }[] = [
 /** ご利用時の注意事項 セクションタイトル（予約詳細等で参照リンク用） */
 export const NOTICE_TITLE = "ご利用時の注意事項";
 
-/** 予約カレンダー：トップページへのリンク文言 */
-export const NOTICE_LINK_TO_TOP = "※ご利用時の注意事項はトップページをご確認ください。";
+/** 予約カレンダー：トップページへのリンク（前後の文言） */
+export const NOTICE_LINK_PREFIX = "※ご利用時の注意事項は";
+export const NOTICE_LINK_TEXT = "トップページの利用ガイドをご確認ください（こちら）";
 
-/** 予約詳細：トップページへのリンク文言 */
-export const NOTICE_DETAIL_LINK_TO_TOP = "※詳しい利用ルールはトップページをご確認ください。";
+/** 予約詳細：トップページへのリンク（前後の文言） */
+export const NOTICE_DETAIL_LINK_PREFIX = "※詳しい利用ルールは";
+export const NOTICE_DETAIL_LINK_TEXT = "トップページでご確認ください（こちら）";
 
 /** 当日のご案内（予約詳細ページ用） */
 export const SAME_DAY_GUIDE_ITEMS = [

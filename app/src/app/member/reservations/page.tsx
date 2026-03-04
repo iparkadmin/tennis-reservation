@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { getUserReservations, cancelReservation, type Reservation } from "@/lib/supabase";
 import Header from "@/components/Header";
 import { formatDate, formatTime, canModifyReservation } from "@/lib/dateUtils";
-import { NOTICE_LINK_TO_TOP } from "@/lib/constants";
+import { NOTICE_LINK_PREFIX, NOTICE_LINK_TEXT } from "@/lib/constants";
 import Link from "next/link";
 import { Calendar, Clock, Trash2, Edit, Eye, AlertTriangle } from "lucide-react";
 
@@ -279,8 +279,11 @@ export default function ReservationsPage() {
         )}
 
         <div className="mt-8 pt-6 border-t border-outline/20 text-left">
-          <p className="text-sm text-primary font-medium">
-            <Link href="/">{NOTICE_LINK_TO_TOP}</Link>
+          <p className="text-sm text-on-background/80">
+            {NOTICE_LINK_PREFIX}{" "}
+            <Link href="/" className="text-primary-accent underline font-medium hover:opacity-80">
+              {NOTICE_LINK_TEXT}
+            </Link>
           </p>
         </div>
       </main>

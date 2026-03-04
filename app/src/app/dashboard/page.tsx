@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Header from "@/components/Header";
 import BookingCalendar from "@/components/BookingCalendar";
-import { NOTICE_LINK_TO_TOP } from "@/lib/constants";
+import { NOTICE_LINK_PREFIX, NOTICE_LINK_TEXT } from "@/lib/constants";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 
@@ -124,9 +124,10 @@ export default function DashboardPage() {
             <br />
             予約の完了・変更・キャンセル時にメール通知は送信されません。内容はマイページ・予約履歴でご確認ください。
           </p>
-          <p className="mt-3 text-sm text-primary font-medium">
-            <Link href="/" className="hover:underline">
-              {NOTICE_LINK_TO_TOP}
+          <p className="mt-3 text-sm text-on-background/80">
+            {NOTICE_LINK_PREFIX}{" "}
+            <Link href="/" className="text-primary-accent underline font-medium hover:opacity-80">
+              {NOTICE_LINK_TEXT}
             </Link>
           </p>
         </div>
