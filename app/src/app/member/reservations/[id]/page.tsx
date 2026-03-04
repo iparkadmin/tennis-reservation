@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { type Reservation, getCourts, type Court } from "@/lib/supabase";
 import Header from "@/components/Header";
 import { formatDate, formatTime, canModifyReservation } from "@/lib/dateUtils";
-import { NOTICE_ITEMS, NOTICE_TITLE } from "@/lib/constants";
+import { NOTICE_DETAIL_LINK_TO_TOP, SAME_DAY_GUIDE_ITEMS } from "@/lib/constants";
 import Link from "next/link";
 import { Calendar, Clock, Edit, Save, X, AlertTriangle, UserPlus, Users } from "lucide-react";
 import BookingCalendar from "@/components/BookingCalendar";
@@ -285,7 +285,7 @@ export default function ReservationDetailPage() {
             )}
             <div className="pt-4 border-t border-outline/20">
               <p className="text-sm text-primary font-medium">
-                予約の変更・キャンセル時にメール通知は送信されません。
+                ※予約の変更・キャンセル時にメール通知は送信されません。
               </p>
             </div>
             <div className="pt-4 border-t border-outline/20">
@@ -451,15 +451,18 @@ export default function ReservationDetailPage() {
         )}
 
         <div className="mt-8 pt-6 border-t border-outline/20 text-left">
-          <h3 className="text-sm font-bold text-primary mb-2">{NOTICE_TITLE}</h3>
-          <ul className="space-y-1 text-sm text-primary">
-            {NOTICE_ITEMS.map((item, index) => (
+          <h3 className="text-sm font-bold text-primary mb-2">■当日のご案内</h3>
+          <ul className="space-y-1 text-sm text-on-background/80">
+            {SAME_DAY_GUIDE_ITEMS.map((item, index) => (
               <li key={index} className="flex items-start gap-2">
                 <span className="text-primary-accent">・</span>
                 <span>{item}</span>
               </li>
             ))}
           </ul>
+          <p className="mt-3 text-sm text-primary font-medium">
+            <Link href="/">{NOTICE_DETAIL_LINK_TO_TOP}</Link>
+          </p>
         </div>
       </main>
     </div>

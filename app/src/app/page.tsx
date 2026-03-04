@@ -4,7 +4,7 @@ import { Calendar, Clock, User, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Header from "@/components/Header";
-import { NOTICE_ITEMS, NOTICE_TITLE } from "@/lib/constants";
+import { TOP_PAGE_GUIDE_TITLE, TOP_PAGE_GUIDE_SECTIONS } from "@/lib/constants";
 
 export default function Home() {
   const router = useRouter();
@@ -90,7 +90,7 @@ export default function Home() {
               2時間単位で予約
             </h3>
             <p className="text-on-background/70 text-sm">
-              9時ー11時、11時ー13時、13時ー15時、15時ー17時の2時間枠で、1日1枠まで予約可能。
+              9時−11時、11時−13時、13時−15時、15時−17時の2時間枠で、1日2時間1枠・1週間で2枠まで予約可能。
             </p>
           </div>
 
@@ -107,40 +107,22 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 注意事項 */}
+        {/* テニスコート利用ガイド */}
         <section className="card mb-6 bg-primary/5 border border-primary/20 text-left">
-          <h3 className="text-lg font-bold text-primary mb-3">{NOTICE_TITLE}</h3>
-          <ul className="space-y-2 text-on-background/80">
-            {NOTICE_ITEMS.map((item, index) => (
-              <li key={index} className="flex items-start gap-2">
-                <span className="text-primary-accent">・</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* 利用ルール */}
-        <section className="card text-left">
-          <h3 className="text-xl font-bold text-primary mb-4">ご利用ルール</h3>
-          <ul className="space-y-2 text-on-background/80">
-            <li className="flex items-start gap-2">
-              <span className="text-primary-accent">•</span>
-              予約可能日：土曜・日曜・祝日のみ（今日から30日以内）
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary-accent">•</span>
-              予約可能時間：9時ー11時、11時ー13時、13時ー15時、15時ー17時（2時間枠）
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary-accent">•</span>
-              ご利用時間は指定の2時間ごととなります。
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary-accent">•</span>
-              キャンセルは前日17時まで可能
-            </li>
-          </ul>
+          <h3 className="text-xl font-bold text-primary mb-4">{TOP_PAGE_GUIDE_TITLE}</h3>
+          {TOP_PAGE_GUIDE_SECTIONS.map((section, sIdx) => (
+            <div key={sIdx} className="mb-4 last:mb-0">
+              <h4 className="text-sm font-bold text-primary mb-2">■{section.title}</h4>
+              <ul className="space-y-2 text-on-background/80">
+                {section.items.map((item, iIdx) => (
+                  <li key={iIdx} className="flex items-start gap-2">
+                    <span className="text-primary-accent">・</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </section>
       </main>
     </div>

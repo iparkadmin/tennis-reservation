@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Header from "@/components/Header";
 import BookingCalendar from "@/components/BookingCalendar";
-import { NOTICE_ITEMS, NOTICE_TITLE } from "@/lib/constants";
+import { NOTICE_LINK_TO_TOP } from "@/lib/constants";
 import Link from "next/link";
 import { AlertCircle } from "lucide-react";
 
@@ -112,27 +112,22 @@ export default function DashboardPage() {
           <p className="text-on-background/70">
             土曜・日曜・祝日のみ、今日から30日以内が予約可能です。
             <br />
-            時間枠は9時ー11時、11時ー13時、13時ー15時、15時ー17時の2時間単位となります。
+            時間枠は9時−11時、11時−13時、13時−15時、15時−17時の2時間単位となります。
             <br />
             1日2時間1枠・1週間（表示の7日）で2枠まで予約可能です。
             <br />
-            枠を選んで「予約を確定」を押してください。
+            枠を選んで「予約を確定」を押してください。選択の解除は枠を再クリックしてください。
             <br />
-            選択の解除は枠を再クリックしてください。
+            キャンセルは前日17時まで可能です。
+            <br />
+            ご予約の際に利用者全員（当日参加される方の氏名）をご登録ください。登録されていない方のご利用はできません。
+            <br />
+            予約の完了・変更・キャンセル時にメール通知は送信されません。内容はマイページ・予約履歴でご確認ください。
           </p>
-          <div className="mt-3 px-4 py-2 rounded-lg bg-primary/5 border border-primary/20 text-left">
-            <h3 className="text-sm font-bold text-primary mb-2">{NOTICE_TITLE}</h3>
-            <ul className="space-y-1 text-sm text-primary">
-              {NOTICE_ITEMS.map((item, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <span className="text-primary-accent">・</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
           <p className="mt-3 text-sm text-primary font-medium">
-            ※予約の完了・変更・キャンセル時にメール通知は送信されません。内容はマイページ・予約履歴でご確認ください。
+            <Link href="/" className="hover:underline">
+              {NOTICE_LINK_TO_TOP}
+            </Link>
           </p>
         </div>
         <BookingCalendar userId={user?.id} />

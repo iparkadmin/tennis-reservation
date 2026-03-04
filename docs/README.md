@@ -24,6 +24,10 @@
   - マイページ機能の要件定義
   - プロフィール編集、予約管理機能の詳細
 
+- **[app/31_utilization_records_requirements.md](./app/31_utilization_records_requirements.md)**
+  - 利用者実績記録機能の要件定義
+  - 利用有無・マナー状況の記録、四半期レビュー、見える化まで
+
 - **[app/10_email_notification_list.md](./app/10_email_notification_list.md)**
   - 自動送付メールの完全なリスト
   - メール種類、送信タイミング、実装状況、優先度
