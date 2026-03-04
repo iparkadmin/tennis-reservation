@@ -5,9 +5,9 @@ import Link from "next/link";
 import {
   getAllReservations,
   getCourtsForAdmin,
-  type Reservation,
-  type Court,
-} from "@/lib/supabase";
+} from "@/lib/adminApiClient";
+import type { Reservation, Court } from "@/lib/supabase";
+import { UTILIZATION_STATUS_LABELS, MANNERS_STATUS_LABELS } from "@/lib/constants";
 import { formatDate, formatTime } from "@/lib/dateUtils";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -127,6 +127,8 @@ export default function AdminReservationsPage() {
                 <th className="text-left py-3 px-4">時間</th>
                 <th className="text-left py-3 px-4">予約者</th>
                 <th className="text-left py-3 px-4">予約番号</th>
+                <th className="text-left py-3 px-4">利用有無</th>
+                <th className="text-left py-3 px-4">マナー状況</th>
                 <th className="text-left py-3 px-4">連絡事項</th>
                 <th className="text-left py-3 px-4"></th>
               </tr>
@@ -143,6 +145,12 @@ export default function AdminReservationsPage() {
                     {(r as any).profile?.full_name ?? "-"}
                   </td>
                   <td className="py-3 px-4 font-mono text-xs">{r.reservation_number ?? "-"}</td>
+                  <td className="py-3 px-4 text-sm">
+                    {UTILIZATION_STATUS_LABELS[(r as { utilization_record?: { utilization_status?: string } })?.utilization_record?.utilization_status ?? ""] ?? "—"}
+                  </td>
+                  <td className="py-3 px-4 text-sm max-w-[120px] truncate" title={MANNERS_STATUS_LABELS[(r as { utilization_record?: { manners_status?: string } })?.utilization_record?.manners_status ?? ""] ?? ""}>
+                    {MANNERS_STATUS_LABELS[(r as { utilization_record?: { manners_status?: string } })?.utilization_record?.manners_status ?? ""] ?? "—"}
+                  </td>
                   <td className="py-3 px-4 max-w-[200px] truncate" title={r.contact_notes ?? ""}>
                     {r.contact_notes ?? "-"}
                   </td>

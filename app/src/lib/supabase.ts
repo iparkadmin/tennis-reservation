@@ -32,6 +32,17 @@ export type Profile = {
   is_blocked?: boolean
 }
 
+export type UtilizationRecord = {
+  id: string
+  reservation_id: string
+  recorded_by: string | null
+  utilization_status: string
+  manners_status: string
+  memo: string | null
+  created_at: string
+  updated_at: string
+}
+
 export type Reservation = {
   id: string
   user_id: string
@@ -51,6 +62,7 @@ export type Reservation = {
   }
   profile?: Profile
   utilizers?: Utilizer[]
+  utilization_record?: UtilizationRecord | null
 }
 
 export type Court = {

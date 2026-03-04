@@ -191,3 +191,50 @@ export async function deleteUtilizer(utilizerId: string): Promise<boolean> {
   }
   return true;
 }
+
+// ===========================================
+// 利用実績記録（utilization_records）
+// ===========================================
+
+export type UtilizationRecord = {
+  id: string;
+  reservation_id: string;
+  recorded_by: string | null;
+  utilization_status: string;
+  manners_status: string;
+  memo: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function getUtilizationRecord(
+  reservationId: string
+): Promise<UtilizationRecord | null> {
+  try {
+    return await fetchJson(
+      `${base}/utilization-records?reservationId=${encodeURIComponent(reservationId)}`
+    );
+  } catch {
+    return null;
+  }
+}
+
+export async function upsertUtilizationRecord(
+  reservationId: string,
+  data: {
+    utilizationStatus: string;
+    mannersStatus: string;
+    memo?: string;
+  }
+): Promise<UtilizationRecord> {
+  return fetchJson(`${base}/utilization-records`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      reservationId,
+      utilizationStatus: data.utilizationStatus,
+      mannersStatus: data.mannersStatus,
+      memo: data.memo ?? "",
+    }),
+  });
+}

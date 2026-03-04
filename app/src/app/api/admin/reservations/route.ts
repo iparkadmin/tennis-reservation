@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const supabase = getAdminClient();
     let query = supabase
       .from("reservations")
-      .select("*, court:courts(*), profile:profiles(*)")
+      .select("*, court:courts(*), profile:profiles(*), utilization_records(*)")
       .order("booking_date", { ascending: false })
       .order("start_time", { ascending: false });
 
@@ -26,10 +26,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const reservations = (data || []).map((r: { profile: unknown }) => ({
-      ...r,
-      profile: Array.isArray(r.profile) ? r.profile[0] : r.profile,
-    }));
+    const reservations = (data || []).map((r: { profile: unknown; utilization_records: unknown }) => {
+      const ur = r.utilization_records;
+      const utilization_record = Array.isArray(ur) ? ur[0] : ur;
+      return {
+        ...r,
+        profile: Array.isArray(r.profile) ? r.profile[0] : r.profile,
+        utilization_record: utilization_record ?? null,
+      };
+    });
 
     return NextResponse.json(reservations);
   } catch (e) {

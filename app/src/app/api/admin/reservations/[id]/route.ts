@@ -10,7 +10,7 @@ export async function GET(
     const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("reservations")
-      .select("*, court:courts(*), profile:profiles(*)")
+      .select("*, court:courts(*), profile:profiles(*), utilization_record:utilization_records(*)")
       .eq("id", id)
       .single();
 
@@ -18,10 +18,13 @@ export async function GET(
       return NextResponse.json({ error: "予約が見つかりません" }, { status: 404 });
     }
 
-    const r = data as { profile: unknown };
+    const r = data as { profile: unknown; utilization_records: unknown };
+    const ur = r.utilization_records;
+    const utilization_record = Array.isArray(ur) ? ur[0] : ur;
     return NextResponse.json({
       ...r,
       profile: Array.isArray(r.profile) ? r.profile[0] : r.profile,
+      utilization_record: utilization_record ?? null,
     });
   } catch (e) {
     console.error("[admin/reservations/[id]]", e);

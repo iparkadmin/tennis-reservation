@@ -76,6 +76,42 @@ export const SAME_DAY_GUIDE_ITEMS = [
 export const EMAIL_IPARK_PORTAL_NOTICE =
   "メールアドレスはアイパークポータルでご利用のメールアドレスをご入力ください。";
 
+/** 利用実績記録：利用有無の選択肢 */
+export const UTILIZATION_STATUS_OPTIONS = [
+  { value: "unrecorded", label: "未記録" },
+  { value: "used", label: "利用済" },
+  { value: "no_show", label: "無断キャンセル" },
+] as const;
+
+/** 利用実績記録：マナー状況の選択肢 */
+export const MANNERS_STATUS_OPTIONS = [
+  { value: "no_violation", label: "違反なし" },
+  { value: "loud_music", label: "大声・音楽再生" },
+  { value: "time_exceeded", label: "利用時間超過" },
+  { value: "garbage", label: "ゴミの持ち帰り不備" },
+  { value: "smoking", label: "喫煙の疑いあり" },
+  { value: "restoration", label: "現状復旧不備" },
+  { value: "manners_other", label: "マナー状況その他" },
+] as const;
+
+/** 利用実績記録：利用有無の表示用ラベル */
+export const UTILIZATION_STATUS_LABELS: Record<string, string> = {
+  unrecorded: "未記録",
+  used: "利用済",
+  no_show: "無断キャンセル",
+};
+
+/** 利用実績記録：マナー状況の表示用ラベル */
+export const MANNERS_STATUS_LABELS: Record<string, string> = {
+  no_violation: "違反なし",
+  loud_music: "大声・音楽再生",
+  time_exceeded: "利用時間超過",
+  garbage: "ゴミの持ち帰り不備",
+  smoking: "喫煙の疑いあり",
+  restoration: "現状復旧不備",
+  manners_other: "マナー状況その他",
+};
+
 /** 予約時の利用者入力 */
 export const UTILIZERS_LABEL = "利用者（当日参加される方の氏名）";
 export const UTILIZERS_DESCRIPTION =
