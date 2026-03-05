@@ -140,6 +140,50 @@ export default function AdminReservationDetailPage() {
         </dl>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 items-start">
+        <div className="card">
+          <h2 className="text-lg font-bold text-primary mb-4">予約者</h2>
+          {profile ? (
+            <div className="space-y-2">
+              <p>
+                <span className="text-on-background/70">氏名: </span>
+                {profile.full_name || "-"}
+              </p>
+              <p>
+                <span className="text-on-background/70">メール: </span>
+                {profile.email || "-"}
+              </p>
+              <Link
+                href={`/admin/users/${reservation.user_id}`}
+                className="text-primary hover:underline text-sm"
+              >
+                ユーザー詳細へ →
+              </Link>
+            </div>
+          ) : (
+            <p className="text-on-background/70">ユーザー情報を読み込んでいます...</p>
+          )}
+        </div>
+
+        <div className="card">
+          <h2 className="text-lg font-bold text-primary mb-4">利用者（当日参加者）</h2>
+          {(reservation.utilizers?.length ?? 0) > 0 ? (
+            <div className="flex items-start gap-3">
+              <Users className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+              <ul className="space-y-1">
+                {reservation.utilizers!.map((u) => (
+                  <li key={u.id} className="text-on-background">
+                    {u.full_name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-on-background/70">登録なし</p>
+          )}
+        </div>
+      </div>
+
       <div className="card mb-6">
         <h2 className="text-lg font-bold text-primary mb-4">利用実績記録</h2>
         <div className="space-y-4">
@@ -212,46 +256,6 @@ export default function AdminReservationDetailPage() {
                 {savingRecord ? "保存中..." : "利用実績を保存"}
               </button>
         </div>
-      </div>
-
-      {(reservation.utilizers?.length ?? 0) > 0 && (
-        <div className="card mb-6">
-          <h2 className="text-lg font-bold text-primary mb-4">利用者（当日参加者）</h2>
-          <div className="flex items-start gap-3">
-            <Users className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-            <ul className="space-y-1">
-              {reservation.utilizers!.map((u) => (
-                <li key={u.id} className="text-on-background">
-                  {u.full_name}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
-
-      <div className="card mb-6">
-        <h2 className="text-lg font-bold text-primary mb-4">予約者</h2>
-        {profile ? (
-          <div className="space-y-2">
-            <p>
-              <span className="text-on-background/70">氏名: </span>
-              {profile.full_name || "-"}
-            </p>
-            <p>
-              <span className="text-on-background/70">メール: </span>
-              {profile.email || "-"}
-            </p>
-            <Link
-              href={`/admin/users/${reservation.user_id}`}
-              className="text-primary hover:underline text-sm"
-            >
-              ユーザー詳細へ →
-            </Link>
-          </div>
-        ) : (
-          <p className="text-on-background/70">ユーザー情報を読み込んでいます...</p>
-        )}
       </div>
 
       {canModify() && (
