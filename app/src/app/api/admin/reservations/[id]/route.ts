@@ -24,7 +24,8 @@ export async function GET(
       .select("utilizers(id, full_name)")
       .eq("reservation_id", id);
 
-    const utilizers = ((ruData || []) as { utilizers: { id: string; full_name: string } | null }[])
+    const rawList = (ruData ?? []) as unknown as Array<{ utilizers: { id: string; full_name: string } | null }>;
+    const utilizers: { id: string; full_name: string }[] = rawList
       .map((ru) => ru.utilizers)
       .filter((u): u is { id: string; full_name: string } => u != null);
 
