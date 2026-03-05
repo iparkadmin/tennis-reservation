@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Calendar, CalendarDays, LogOut, Building2, FileText, KeyRound } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, CalendarDays, LogOut, Building2, FileText, KeyRound, BarChart2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminLayout({
@@ -24,6 +24,7 @@ export default function AdminLayout({
     { href: "/admin/reservations", label: "予約一覧", icon: Calendar },
     { href: "/admin/calendar", label: "予約カレンダー", icon: CalendarDays },
     { href: "/admin/courts", label: "コート管理", icon: Building2 },
+    { href: "/admin/utilization-report", label: "利用実績", icon: BarChart2 },
     { href: "/admin/audit-logs", label: "監査ログ", icon: FileText },
   ];
 

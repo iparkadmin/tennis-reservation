@@ -238,3 +238,36 @@ export async function upsertUtilizationRecord(
     }),
   });
 }
+
+// ===========================================
+// 利用実績集計（utilization-report）
+// ===========================================
+
+export type UtilizationReportRow = {
+  user_id: string;
+  full_name: string;
+  email: string;
+  is_blocked: boolean;
+  no_show_count: number;
+  manners_violation_count: number;
+  manners_other_count: number;
+  used_count: number;
+};
+
+export async function getUtilizationReport(params?: {
+  startYear?: number;
+  startMonth?: number;
+  endYear?: number;
+  endMonth?: number;
+}): Promise<{
+  period: { startYear: number; startMonth: number; endYear: number; endMonth: number };
+  rows: UtilizationReportRow[];
+}> {
+  const search = new URLSearchParams();
+  if (params?.startYear != null) search.set("startYear", String(params.startYear));
+  if (params?.startMonth != null) search.set("startMonth", String(params.startMonth));
+  if (params?.endYear != null) search.set("endYear", String(params.endYear));
+  if (params?.endMonth != null) search.set("endMonth", String(params.endMonth));
+  const q = search.toString();
+  return fetchJson(`${base}/utilization-report${q ? `?${q}` : ""}`);
+}
