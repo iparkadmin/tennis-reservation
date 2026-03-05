@@ -150,7 +150,7 @@ export default function AdminUtilizationReportPage() {
                         {r.is_blocked ? (
                           <span className="text-highlight font-medium">利用制限中</span>
                         ) : (
-                          —
+                          <>—</>
                         )}
                       </td>
                     </tr>
