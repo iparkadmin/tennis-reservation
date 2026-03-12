@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Calendar, CalendarDays, LogOut, Building2, FileText, KeyRound, BarChart2 } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, CalendarDays, LogOut, Building2, FileText, KeyRound, BarChart2, BookOpen } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminLayout({
@@ -26,6 +26,7 @@ export default function AdminLayout({
     { href: "/admin/courts", label: "コート管理", icon: Building2 },
     { href: "/admin/utilization-report", label: "利用実績", icon: BarChart2 },
     { href: "/admin/audit-logs", label: "監査ログ", icon: FileText },
+    { href: "/manual/admin-manual-v1.0.pdf", label: "管理者マニュアル", icon: BookOpen, external: true },
   ];
 
   // ログインページではサイドバーを表示しない
@@ -41,7 +42,21 @@ export default function AdminLayout({
           <p className="text-sm text-on-primary/80">テニスコート予約</p>
         </div>
         <nav className="flex-1 p-2">
-          {navItems.map(({ href, label, icon: Icon }) => {
+          {navItems.map(({ href, label, icon: Icon, external }) => {
+            if (external) {
+              return (
+                <a
+                  key={href}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg mb-1 transition-colors hover:bg-primary/20 text-on-primary/90"
+                >
+                  <Icon className="w-5 h-5" />
+                  {label}
+                </a>
+              );
+            }
             const isActive = href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
             return (
               <Link
