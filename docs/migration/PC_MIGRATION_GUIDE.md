@@ -120,10 +120,16 @@
 
 ### 4.1 Node.js のインストール
 
-https://nodejs.org/ から LTS版（18以上）をインストール。
+管理者権限がなくても winget でユーザー単位インストールが可能です。
 
 ```powershell
-# インストール確認
+# PowerShell またはコマンドプロンプトで実行
+winget install OpenJS.NodeJS.LTS --scope user
+```
+
+インストール後、ターミナルを再起動してバージョンを確認：
+
+```powershell
 node -v   # v18.x.x 以上
 npm -v    # 9.x.x 以上
 ```
