@@ -1,0 +1,164 @@
+# テニスコート予約システム - Next.jsアプリケーション
+
+## 📋 概要
+
+テニスコート予約システムのフロントエンドアプリケーション。Next.js 15 (App Router) + React 19で構築。
+
+---
+
+## 🚀 セットアップ
+
+### 1. Node.jsインストール
+https://nodejs.org/ からLTS版をインストール
+
+### 2. 依存関係インストール
+```bash
+npm install
+```
+
+### 3. 環境変数設定
+`.env.local` ファイルを作成し、以下の環境変数を設定：
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+### 4. Supabaseデータベースセットアップ
+`doc/`（親ディレクトリ）を参照：
+
+1. **基本テーブル**: `../doc/02_database_setup.sql` を実行
+2. **予約変更用RLS**（必須）: `../doc/03_reservations_update_policy.sql` を実行
+3. **コート2面対応**（必須）: `../doc/05_database_update_for_courts.sql` を実行  
+   - 手順: `../doc/15_court_update_execution_guide.md`
+4. **マイページ用**（任意）: `../doc/04_database_update_for_mypage.sql` を実行
+
+### 5. 開発サーバー起動
+```bash
+npm run dev
+```
+
+http://localhost:3000 でアプリが起動します。
+
+---
+
+## 🛠️ 技術スタック
+
+- **Framework**: Next.js 15 (App Router)
+- **UI Library**: React 19
+- **Styling**: Tailwind CSS + Material Design 3
+- **Database**: Supabase (PostgreSQL)
+- **Auth**: Supabase Auth
+- **Date Utilities**: date-fns
+- **Icons**: lucide-react
+- **Language**: TypeScript
+
+---
+
+## 📝 コミットメッセージ
+
+**Vercel のデプロイ一覧で文字化けしないよう、コミットメッセージは英語で書くことを推奨します。**  
+例: `Add privacy policy link to footer`, `Fix 404: set Root Directory empty`
+
+---
+
+## 📁 プロジェクト構造
+
+```
+tennis-app/
+├── src/
+│   ├── app/                      # Next.js App Router
+│   │   ├── page.tsx             # トップページ
+│   │   ├── login/               # ログイン・新規登録
+│   │   ├── dashboard/           # 予約カレンダー
+│   │   └── member/              # 会員ページ
+│   │       ├── profile/         # プロフィール編集
+│   │       └── reservations/   # 予約履歴・詳細
+│   ├── components/              # Reactコンポーネント
+│   │   ├── Header.tsx          # ヘッダー
+│   │   ├── AuthForm.tsx        # 認証フォーム
+│   │   └── BookingCalendar.tsx  # 予約カレンダー
+│   └── lib/                     # ユーティリティ
+│       ├── supabase.ts          # Supabaseクライアント・API
+│       └── dateUtils.ts         # 日付ユーティリティ
+├── public/                      # 静的ファイル
+│   └── logo-white.svg          # ロゴ
+├── package.json
+└── README.md
+```
+
+---
+
+## ✨ 主な機能
+
+### 認証機能
+- 新規登録（メール認証対応）
+- ログイン
+- パスワードリセット
+
+### 予約機能
+- コート選択（コートA・コートB）
+- 予約カレンダー表示（週表示）
+- 時間枠選択（9:00-17:00、1時間単位）
+- 土日祝のみ予約可能
+- 1日最大2時間制限（コートごと）
+
+### マイページ機能
+- プロフィール確認・編集
+- 予約履歴表示
+- 予約詳細表示
+- 予約変更・キャンセル（前日まで）
+
+---
+
+## 🎨 カラーパレット（Material Design 3）
+
+| 用途 | HEX | Pantone |
+|------|-----|---------|
+| Primary | #16145F | 2765 |
+| Primary Light | #0067B1 | 293 |
+| Accent | #00A5E3 | 7460 |
+| Outline | #B6B8BA | 422 |
+| Highlight | #E72241 | 1925 |
+
+---
+
+## 📝 開発コマンド
+
+```bash
+# 開発サーバー起動
+npm run dev
+
+# 本番ビルド
+npm run build
+
+# 本番サーバー起動
+npm run start
+
+# リント
+npm run lint
+```
+
+---
+
+## 🔧 環境変数
+
+| 変数名 | 説明 | 必須 |
+|--------|------|:----:|
+| `NEXT_PUBLIC_SUPABASE_URL` | SupabaseプロジェクトURL | ✅ |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase匿名キー | ✅ |
+| `NEXT_PUBLIC_APP_URL` | アプリケーションURL | ✅ |
+
+---
+
+## 📚 関連ドキュメント
+
+詳細なドキュメントは親フォルダーの `doc/` を参照：
+
+- **デプロイ**: `../doc/06_vercel_deployment_guide.md`
+- **DB**: `../doc/02_database_setup.sql`, `../doc/03_reservations_update_policy.sql`, `../doc/05_database_update_for_courts.sql`
+
+---
+
+*最終更新: 2025年1月*

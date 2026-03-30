@@ -1,0 +1,17 @@
+{
+  "name": "tennis-reservation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tennis court reservation - Vercel root for monorepo",
+  "scripts": {
+    "build": "cd app && npm install && npm run build",
+    "dev": "cd app && npm run dev",
+    "start": "cd app && npm run start"
+  },
+  "dependencies": {
+    "next": "^15.1.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

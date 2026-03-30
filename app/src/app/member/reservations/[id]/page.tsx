@@ -1,0 +1,473 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { type Reservation, getCourts, type Court } from "@/lib/supabase";
+import Header from "@/components/Header";
+import { formatDate, formatTime, canModifyReservation } from "@/lib/dateUtils";
+import { NOTICE_DETAIL_LINK_PREFIX, NOTICE_DETAIL_LINK_TEXT, SAME_DAY_GUIDE_ITEMS } from "@/lib/constants";
+import Link from "next/link";
+import { Calendar, Clock, Edit, Save, X, AlertTriangle, UserPlus, Users } from "lucide-react";
+import BookingCalendar from "@/components/BookingCalendar";
+import { UTILIZERS_LABEL, UTILIZERS_DESCRIPTION } from "@/lib/constants";
+
+export default function ReservationDetailPage() {
+  const router = useRouter();
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const reservationId = params.id as string;
+  const isEditMode = searchParams.get("edit") === "true";
+
+  const [user, setUser] = useState<any>(null);
+  const [reservation, setReservation] = useState<Reservation | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(isEditMode);
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<{ start: string; end: string } | null>(null);
+  const [selectedCourtId, setSelectedCourtId] = useState<string>("");
+  const [courts, setCourts] = useState<Court[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [profile, setProfile] = useState<{ is_blocked?: boolean } | null>(null);
+  const [editUtilizers, setEditUtilizers] = useState<{ id?: string; full_name: string }[]>([]);
+  const [userUtilizers, setUserUtilizers] = useState<{ id: string; full_name: string }[]>([]);
+
+  const loadReservation = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { getReservationById } = await import("@/lib/supabase");
+      const data = await getReservationById(reservationId);
+      if (!data) {
+        setError("予約が見つかりません");
+        return;
+      }
+      setReservation(data);
+      setSelectedDate(data.booking_date);
+      setSelectedCourtId(data.court_id);
+      setSelectedTime(
+        data.start_time && data.end_time
+          ? { start: data.start_time.substring(0, 5), end: data.end_time.substring(0, 5) }
+          : null
+      );
+      setEditUtilizers(
+        (data.utilizers ?? []).map((u) => ({ id: u.id, full_name: u.full_name }))
+      );
+
+      const courtsData = await getCourts();
+      setCourts(courtsData);
+    } catch (error) {
+      console.error("Failed to load reservation:", error);
+      setError("予約情報の読み込みに失敗しました");
+    } finally {
+      setLoading(false);
+    }
+  }, [reservationId]);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) {
+        router.push("/login");
+      } else {
+        setUser(session.user);
+        const { getProfile } = await import("@/lib/supabase");
+        const p = await getProfile(session.user.id);
+        setProfile(p);
+        loadReservation();
+      }
+    });
+  }, [router, reservationId, loadReservation]);
+
+  // 編集モードでユーザーの利用者一覧を読み込み
+  useEffect(() => {
+    if (editing && user?.id) {
+      import("@/lib/supabase").then(({ getUtilizers }) =>
+        getUtilizers(user.id).then(setUserUtilizers)
+      );
+    } else {
+      setUserUtilizers([]);
+    }
+  }, [editing, user?.id]);
+
+  const canModify = (bookingDate: string): boolean => canModifyReservation(bookingDate);
+
+  const handleUpdate = async () => {
+    if (!reservation || !selectedTime || !selectedCourtId || !user) return;
+
+    try {
+      setSaving(true);
+      setError(null);
+
+      const {
+        updateReservation,
+        createUtilizer,
+        updateUtilizer,
+        setReservationUtilizers,
+      } = await import("@/lib/supabase");
+
+      await updateReservation(reservation.id, {
+        court_id: selectedCourtId,
+        booking_date: selectedDate,
+        start_time: selectedTime.start,
+        end_time: selectedTime.end,
+      });
+
+      const utilizerIds: string[] = [];
+      for (const u of editUtilizers) {
+        const name = u.full_name?.trim();
+        if (!name) continue;
+        if (u.id) {
+          const orig = userUtilizers.find((x) => x.id === u.id);
+          if (orig && orig.full_name !== name) {
+            await updateUtilizer(u.id, user.id, { full_name: name });
+          }
+          utilizerIds.push(u.id);
+        } else {
+          const created = await createUtilizer(user.id, name);
+          if (created) utilizerIds.push(created.id);
+        }
+      }
+      await setReservationUtilizers(reservation.id, utilizerIds);
+
+      router.push("/member/reservations");
+    } catch (error: any) {
+      setError(error.message || "予約の変更に失敗しました");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const addEditUtilizer = () =>
+    setEditUtilizers((prev) => [...prev, { full_name: "" }]);
+  const updateEditUtilizer = (index: number, full_name: string) =>
+    setEditUtilizers((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], full_name };
+      return next;
+    });
+  const removeEditUtilizer = (index: number) =>
+    setEditUtilizers((prev) => prev.filter((_, i) => i !== index));
+  const addFromUserUtilizers = (u: { id: string; full_name: string }) => {
+    if (editUtilizers.some((eu) => eu.id === u.id)) return;
+    setEditUtilizers((prev) => [...prev, { id: u.id, full_name: u.full_name }]);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="max-w-4xl mx-auto px-6 py-8">
+          <div className="text-center text-on-background/70">読み込み中...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!reservation) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="max-w-4xl mx-auto px-6 py-8">
+          <div className="card text-center py-12">
+            <p className="text-on-background/70 mb-4">予約が見つかりません</p>
+            <button onClick={() => router.push("/member/reservations")} className="btn-primary">
+              予約履歴に戻る
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (profile?.is_blocked) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="max-w-4xl mx-auto px-6 py-8">
+          <div className="card max-w-2xl mx-auto">
+            <div className="flex items-start gap-4 p-4 rounded-lg bg-highlight/10 border border-highlight">
+              <AlertTriangle className="w-6 h-6 text-highlight flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-highlight mb-2">
+                  アカウントがブロックされています
+                </h3>
+                <p className="text-on-background mb-4">
+                  このアカウントは管理者によりブロックされています。予約の作成・変更・キャンセルはできません。ご不明な点は管理者にお問い合わせください。
+                </p>
+                <Link href="/" className="btn-secondary">
+                  トップへ戻る
+                </Link>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const isModifiable = canModify(reservation.booking_date);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="max-w-4xl mx-auto px-6 py-8">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-primary mb-2">予約詳細</h2>
+          {isModifiable && !editing && (
+            <button
+              onClick={() => setEditing(true)}
+              className="btn-secondary flex items-center gap-2"
+            >
+              <Edit className="w-4 h-4" />
+              予約を変更
+            </button>
+          )}
+        </div>
+
+        {error && (
+          <div className="card bg-highlight/10 border border-highlight text-highlight mb-6">
+            {error}
+          </div>
+        )}
+
+        {!editing ? (
+          /* 詳細表示モード */
+          <div className="card space-y-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Calendar className="w-6 h-6 text-primary" />
+              <span className="text-xl font-bold text-primary">
+                {formatDate(reservation.booking_date)}
+              </span>
+            </div>
+            {reservation.court && (
+              <div className="flex items-center gap-3 text-on-background/70">
+                <span className="text-sm font-medium">コート:</span>
+                <span className="text-lg font-bold text-primary">
+                  {reservation.court.display_name}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-3 text-on-background/70">
+              <Clock className="w-5 h-5" />
+              <span className="text-lg">
+                {formatTime(reservation.start_time)} - {formatTime(reservation.end_time)}
+              </span>
+            </div>
+            {(reservation.utilizers?.length ?? 0) > 0 && (
+              <div className="flex items-start gap-3 pt-4 border-t border-outline/20">
+                <Users className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-on-background/70 mb-1">
+                    {UTILIZERS_LABEL}
+                  </p>
+                  {reservation.profile?.full_name && (
+                    <p className="text-xs text-on-background/60 mb-2">
+                      申請者・登録者: {reservation.profile.full_name}
+                    </p>
+                  )}
+                  <ul className="space-y-1">
+                    {reservation.utilizers!.map((u) => (
+                      <li key={u.id} className="text-on-background">
+                        {u.full_name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+            {(reservation as any).reservation_number && (
+              <div className="pt-4 border-t border-outline/20">
+                <span className="text-sm text-on-background/60">予約番号:</span>
+                <p className="font-mono text-lg font-bold text-primary">
+                  {(reservation as any).reservation_number}
+                </p>
+              </div>
+            )}
+            <div className="pt-4 border-t border-outline/20">
+              <p className="text-sm text-primary font-medium">
+                ※予約の変更・キャンセル時にメール通知は送信されません。
+              </p>
+            </div>
+            <div className="pt-4 border-t border-outline/20">
+              <span className="text-sm text-on-background/60">作成日時:</span>
+              <p className="text-on-background/80">
+                {new Date(reservation.created_at).toLocaleString("ja-JP")}
+              </p>
+            </div>
+            {!isModifiable && (
+              <div className="pt-4 border-t border-outline/20">
+                <p className="text-sm text-on-background/60">
+                  前日17時以降は変更・キャンセルできません
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* 変更モード */
+          <div className="space-y-6">
+            <div className="card">
+              <h3 className="text-lg font-bold text-primary mb-4">予約日時を変更</h3>
+              <div className="mb-4">
+                <p className="text-sm text-on-background/60 mb-2">現在の予約:</p>
+                <p className="font-medium">
+                  {formatDate(reservation.booking_date)} {formatTime(reservation.start_time)} - {formatTime(reservation.end_time)}
+                </p>
+              </div>
+              <div className="mb-4">
+                <p className="text-sm text-on-background/60 mb-2">新しい予約:</p>
+                {selectedTime ? (
+                  <p className="font-medium text-primary-accent">
+                    {formatDate(selectedDate)} {formatTime(selectedTime.start)} - {formatTime(selectedTime.end)}
+                  </p>
+                ) : (
+                  <p className="text-on-background/60">日時を選択してください</p>
+                )}
+              </div>
+            </div>
+
+            {/* コート選択 */}
+            {courts.length > 0 && (
+              <div className="card mb-4">
+                <label className="block text-sm font-medium text-on-background mb-2">
+                  コート選択
+                </label>
+                <div className="flex gap-2">
+                  {courts.map((court) => (
+                    <button
+                      key={court.id}
+                      onClick={() => setSelectedCourtId(court.id)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        selectedCourtId === court.id
+                          ? "bg-primary text-on-primary"
+                          : "bg-surface text-on-background/70 hover:bg-surface/80"
+                      }`}
+                    >
+                      {court.display_name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="card">
+              <BookingCalendar
+                userId={user?.id}
+                selectionMode={true}
+                selectedCourtId={selectedCourtId}
+                onTimeSelect={(date, start, end) => {
+                  setSelectedDate(date ?? "");
+                  setSelectedTime(date != null && start != null && end != null ? { start, end } : null);
+                }}
+              />
+            </div>
+
+            {/* 利用者の変更 */}
+            <div className="card">
+              <h3 className="text-lg font-bold text-primary mb-2">
+                {UTILIZERS_LABEL}
+              </h3>
+              {reservation.profile?.full_name && (
+                <p className="text-sm text-on-background/70 mb-2">
+                  申請者・登録者: {reservation.profile.full_name}
+                </p>
+              )}
+              <p className="text-xs text-on-background/60 mb-3">
+                {UTILIZERS_DESCRIPTION}
+              </p>
+              <div className="space-y-2 mb-3">
+                {editUtilizers.map((u, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={u.full_name}
+                      onChange={(e) => updateEditUtilizer(i, e.target.value)}
+                      className="input flex-1"
+                      placeholder="氏名"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeEditUtilizer(i)}
+                      className="p-2 text-highlight hover:bg-highlight/10 rounded-lg"
+                      title="削除"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={addEditUtilizer}
+                  className="text-sm text-primary-accent hover:underline flex items-center gap-1"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  利用者を追加
+                </button>
+                {userUtilizers
+                  .filter(
+                    (u) => !editUtilizers.some((eu) => eu.id === u.id || eu.full_name === u.full_name)
+                  )
+                  .map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => addFromUserUtilizers(u)}
+                      className="text-sm px-2 py-1 rounded bg-surface text-on-background/80 hover:bg-surface/80"
+                    >
+                      + {u.full_name}
+                    </button>
+                  ))}
+              </div>
+            </div>
+
+            <p className="text-sm text-primary font-medium">
+              変更確定後もメール通知は送信されません。予約履歴でご確認ください。
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={handleUpdate}
+                disabled={!selectedTime || saving}
+                className="btn-primary flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                {saving ? "変更中..." : "変更を確定"}
+              </button>
+              <button
+                onClick={() => {
+                  setEditing(false);
+                  setSelectedTime(null);
+                  setEditUtilizers(
+                    (reservation?.utilizers ?? []).map((u) => ({ id: u.id, full_name: u.full_name }))
+                  );
+                }}
+                className="btn-secondary flex items-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                変更をキャンセル
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-8 pt-6 border-t border-outline/20 text-left">
+          <h3 className="text-sm font-bold text-primary mb-2">■当日のご案内</h3>
+          <ul className="space-y-1 text-sm text-on-background/80">
+            {SAME_DAY_GUIDE_ITEMS.map((item, index) => (
+              <li key={index} className="flex items-start gap-2">
+                <span className="text-primary-accent">・</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-sm text-on-background/80">
+            {NOTICE_DETAIL_LINK_PREFIX}{" "}
+            <Link href="/" className="text-primary-accent underline font-medium hover:opacity-80">
+              {NOTICE_DETAIL_LINK_TEXT}
+            </Link>
+          </p>
+        </div>
+      </main>
+    </div>
+  );
+}
