@@ -1,32 +1,75 @@
 # iparkadmin 名義の Blocked Preview を止める（元環境・`TatsuhitoDT/vault`）
 
-タイムラインでは **先に** **Author: iparkadmin**・**Preview**・**Blocked** の行が出て、その **あとに** **TatsuhitoDT** の **Production** が動く、という並びになることがある。困るのは **余計な第一系統（iparkadmin 側）** であり、「謎の第二プッシュ」ではなく **謎の第一プッシュ／第一系統** と捉えると運用と一致しやすい。
+タイムラインでは **先に** **Author: iparkadmin**・**Preview**・**Blocked** の行が出て、その **あとに** **TatsuhitoDT** の **Production** が動く、という並びになることがある。
 
-## 原因（リポジトリに「無意味な push」が増えているわけではないことが多い）
+## 判明した真の原因（2026-04 調査済み）
 
-- `TatsuhitoDT/vault` への **通常の 1 回の push** で、GitHub は **1 本の webhook** を Vercel に送る。
-- 一方で、**同じリポジトリを Vercel が別の GitHub 接続（例: iparkadmin アカウントで入れた GitHub App／二重 Import）でも見ている**と、**同じコミットに対して iparkadmin 名義の Preview ビルド**がもう一系統キューに入る。
-- **Hobby プランや権限**の都合で、その系統だけ **Blocked** になることがある。**本番（TatsuhitoDT・`main`）とは別ライン**。
+**ローカルの `git config user.email` が iparkadmin の GitHub アカウントに紐づくメールアドレスになっていた。**
 
-→ **「iparkadmin 用に余計な push をする」のをやめれば止まる」タイプではなく、「Vercel／GitHub 側の接続を一本化する」タイプの対処が効く。
+| メールアドレス | 紐づく GitHub アカウント |
+|---|---|
+| `tatsuhito.muramatsu@iparkinstitute.com` | **iparkadmin**（→ Blocked の原因） |
+| `muramatsu@dragon-tech.biz` | **TatsuhitoDT**（→ Production 成功） |
 
-## 対処（元環境の各 Vercel プロジェクトごと）
+### 何が起きていたか
 
-1. [Vercel](https://vercel.com) → **該当プロジェクト**（例: `tennis-reservation`）→ **Settings** → **Git**
-2. **Connected Git Repository** が **`TatsuhitoDT/vault`** であることを確認する。
-3. **iparkadmin で入れた古い接続**や、同じ repo が二重に見えている場合は **Disconnect** する。
-4. ブラウザで **TatsuhitoDT** にログインした状態で **Reconnect** / **Import** し直し、OAuth は **`TatsuhitoDT`**（および必要なら org）だけで完了させる。**iparkadmin で Vercel に vault を再接続しない**（コピー用は別プロジェクトで `iparkadmin/tennis-reservation` のみ）。
+```
+① ブランチ push（作業コミット = author: iparkadmin メール）
+    → Vercel が Preview デプロイを試みる
+    → iparkadmin は Vercel チームメンバーでない → Blocked ×4
 
-### GitHub 側（任意だが有効）
+② main への PR マージ（merge commit = author: TatsuhitoDT メール）
+    → Vercel が Production デプロイ → 成功 ×4
+```
 
-5. GitHub → **`TatsuhitoDT/vault`** → **Settings** → **Integrations**（または **GitHub Apps**）
-6. **Vercel** 関連で、**iparkadmin 権限で余分に入っているインストール**があれば削除または権限を整理する。
+- Vercel は **コミットの author メール** を GitHub アカウントに照合し、Vercel チームメンバーか判定する。
+- 1 回の push でも **ブランチコミット（iparkadmin）→ マージコミット（TatsuhitoDT）** の順にデプロイが積まれるため、「iparkadmin が先、TatsuhitoDT が後」という並びになっていた。
+- git remote・Vercel 接続・GitHub App のインストール数はすべて正常（1件のみ）であり、これらは原因ではなかった。
 
-## AI・ローカル操作で守ること（余計なトリガを増やさない）
+## 解決方法
 
-- **`TatsuhitoDT/vault` へは `git push origin …`（`TatsuhitoDT`／`gh` の認証）だけにする。**  
-  **`https://iparkadmin:TOKEN@github.com/TatsuhitoDT/vault.git` のように iparkadmin 用 PAT を vault の remote に埋めて push しない**（Webhook の見え方がずれる原因になりうる）。
-- **コピー環境**の push は **`iparkadmin/tennis-reservation`** のみ（別リポジトリ・別 Vercel プロジェクト）。
+vault リポジトリのローカル設定を TatsuhitoDT のメールに統一する：
+
+```bash
+git config user.email "muramatsu@dragon-tech.biz"
+```
+
+- `--global` なし = vault リポジトリのみに適用。他のリポジトリは変更されない。
+- コピー環境（`iparkadmin/tennis-reservation`）も push アクターは iparkadmin の PAT のままなのでデプロイに影響なし。
+
+### 再発確認方法
+
+```bash
+git log --format="%h %an %ae %s" -5
+```
+
+`user.email` が `tatsuhito.muramatsu@iparkinstitute.com`（iparkadmin）に戻っていたら再設定する。
+
+## 誤った対処（効果なし・試行済み）
+
+以下はすべて確認済みで問題なし。原因ではないため対処しても解消しない：
+
+- Vercel → Settings → Git の Connected Git Repository の再接続（4プロジェクト全件確認済）
+- GitHub → `TatsuhitoDT/vault` → Webhooks（0件）
+- GitHub → `TatsuhitoDT/vault` → Installed GitHub Apps（Vercel 1件のみ）
+- iparkadmin の GitHub App の Repository access（`iparkadmin/tennis-reservation` のみ）
+- iparkadmin が TatsuhitoDT/vault のコラボレーターか（なし）
+- git remote -v（`origin` に iparkadmin 認証情報なし）
+
+## AI・ローカル操作で守ること
+
+- vault リポジトリで作業するときは `git config user.email` が **`muramatsu@dragon-tech.biz`** であることを確認する。
+- **`TatsuhitoDT/vault` へは `git push origin …`（`TatsuhitoDT`／`gh` の認証）だけにする。**
+- **コピー環境**の push は **`iparkadmin/tennis-reservation`** のみ（`publish-iparkadmin-copy.ps1` 使用）。
+
+## コピー環境への push が subtree で通らない場合
+
+GitHub Push Protection が vault 履歴内の秘密情報を検知してブロックすることがある（subtree push はモノレポ履歴ごと送るため）。その場合は `publish-iparkadmin-copy.ps1`（ファイル同期方式）を使う：
+
+```powershell
+# iparkadmin/tennis-reservation を別ディレクトリに clone してから実行
+.\tennis-reservation\scripts\publish-iparkadmin-copy.ps1 -ClonePath "C:\work\iparkadmin-tennis-reservation"
+```
 
 ## 参照
 
