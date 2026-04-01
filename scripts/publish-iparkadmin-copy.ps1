@@ -110,7 +110,7 @@ try {
     git remote set-url origin $authUrl
     try {
         git push origin main
-        Write-Host "iparkadmin main へ push 完了。Vercel（muramatsus-projects）のデプロイを確認してください。" -ForegroundColor Green
+        Write-Host "Push to iparkadmin main OK. Check Vercel (muramatsus-projects) deployment." -ForegroundColor Green
     }
     finally {
         git remote set-url origin $originalUrl

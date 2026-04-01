@@ -9,6 +9,7 @@
 
 - **通常**: コピー環境を更新する
 - **元環境を更新する場合**: 指示で「元環境」と明示する
+- **コピー環境への反映は iparkadmin 経由**: 元環境（`TatsuhitoDT/vault`）と役割を分けたうえで、**公開用コピーへ載せる変更は必ず `iparkadmin/tennis-reservation` に push する**。別の GitHub アカウント／別リポジトリだけを更新してコピー環境のデプロイを代替しない（Vercel・Supabase のペアがずれる）。
 
 ---
 
@@ -44,6 +45,7 @@
 | Vercel | https://vercel.com/muramatsus-projects/tennis-reservation |
 
 - リポジトリ: **単独** `iparkadmin/tennis-reservation`（vault モノレポではない）。Vercel の Root はリポジトリ構成に合わせる（`06_vercel_deployment_guide.md`・README の単独向け記述参照）。
+- **push 先の固定**: コピー環境＝このリポジトリの **`main`（または運用で決めた本番ブランチ）** へ。**元環境用の `origin`（vault）への push だけではコピー環境の本番は更新されない。**
 
 ---
 

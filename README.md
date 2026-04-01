@@ -4,13 +4,102 @@
 
 アプリURL：　https://tennis-reservation-five.vercel.app/login
 
+---
+
+## システム全体構成
+
+このシステムは **ソース（GitHub）→ ビルド・配信（Vercel）→ 実行時のデータ（Supabase）** でつながる。**どの GitHub リポジトリをどの Vercel プロジェクトが見ているか**で、デプロイ先と接続する Supabase が決まる（下表のペア）。
+
+### 変更が本番に届くまで（開発〜デプロイ）
+
+開発者がローカルでコミットし、**決められた GitHub リポジトリ**のブランチ（多くは `main`）に変更が入ると、**Vercel が GitHub からコードを取得**してビルドし、本番（またはプレビュー）URL に反映する。
+
+```
+  [ 開発者 PC ]
+  （vault モノレポ内の tennis-reservation/ などで編集・コミット）
+           │
+           │  git push（または PR マージで main が更新）
+           ▼
+  [ GitHub ]
+  ・元環境 … TatsuhitoDT/vault（テニスは tennis-reservation/）
+  ・コピー環境 … iparkadmin/tennis-reservation
+           │
+           │  Git 連携（Webhook）でデプロイ開始
+           ▼
+  [ Vercel ]
+  ・指定の Root Directory で npm install / next build 等
+  ・環境変数（Supabase URL・キー等）を注入
+  ・ビルド成果物をエッジ／サーバレス上にデプロイ
+           │
+           │  公開 URL（*.vercel.app 等）
+           ▼
+  [ 利用者・ブラウザ ] ──HTTPS──► 上記と同じ Vercel 上の Next.js
+```
+
+- **元環境**: `main` にマージなどで GitHub が更新 → **mtatsuhito-gmailcoms-projects** 側の該当プロジェクトがビルド（vault 接続時は Root Directory **`tennis-reservation`**）。
+- **コピー環境**: `iparkadmin/tennis-reservation` の `main` が更新 → **muramatsus-projects / tennis-reservation** がビルド。
+
+### 本番アクセス時（実行時のデータの流れ）
+
+利用者がブラウザから Vercel の URL にアクセスしたあと、アプリは **Supabase** と通信して認証・DB を扱う。
+
+```
+  [ 利用者・ブラウザ ]
+           │  HTTPS
+           ▼
+  [ Vercel 上の Next.js（app/） ]
+           │
+           ├── API / クライアント SDK ──► [ Supabase Auth ]
+           │
+           └── データ読み書き ──────────► [ PostgreSQL（Supabase） ]
+```
+
+| レイヤ | 役割 |
+|--------|------|
+| **ソース管理** | **GitHub** … 正規のリポジトリ・ブランチにコードが集まる。PR・履歴・Vercel の取り込み元。 |
+| **ビルド・ホスティング** | **Vercel** … GitHub と連携し push / マージをトリガにビルド・デプロイ。本番 URL の提供、環境変数、プレビュー環境。 |
+| **アプリケーション** | `app/` … Next.js（予約 UI、管理画面、API Routes）。ビルド対象は Vercel プロジェクトの Root Directory 設定に従う。 |
+| **BaaS** | **Supabase** … 会員認証、予約・コート等のデータ、RLS、メール連携の土台（環境ごとに別プロジェクト）。 |
+
+### Supabase 無料プランとポーズ防止（GitHub Actions）
+
+**無料プラン**では、**約 7 日間プロジェクトにアクティビティがない**と **ポーズ（一時停止）** される。さらに **放置が続くと復活できなくなる**（事実上の削除に近い扱い）可能性があるため、**定期的に DB に触れる**運用で防いでいる。
+
+- **対策**: リポジトリ **`TatsuhitoDT/vault`** の **GitHub Actions** ワークフロー（`.github/workflows/tennis-supabase-keep-alive.yml`、表示名 *Tennis Reservation - Supabase Keep Alive*）が **週 2 回**（**日曜・水曜 09:00 UTC**）スケジュール実行され、**PostgreSQL に直接接続**して `SELECT 1` 等を実行し、アクティビティを発生させる（REST だけでは不十分なため直結）。
+- **注意**: ワークフローが **エラーで失敗し続ける**と（Repository Secrets の未設定・誤り、接続 URI の失効、一時的な障害など）、**意図どおり DB に届かずポーズ防止にならない**。**Actions タブで成功／失敗をときどき確認**し、**赤い失敗が続いていないか**を見ること。手動再実行は `workflow_dispatch` でも可能。
+- **Secrets・コピー環境の DB も触る設定**など: `docs/deployment/15_supabase_keep_alive_setup.md`
+
+運用上は **元環境**と **コピー環境**の **2系統**があり、**GitHub・Vercel・Supabase の組み合わせを取り違えない**こと（下表）。
+
 ### 環境一覧（作業前確認・間違い防止）
 
-![1775005588582](image/README/1775005588582.png)**モノレポ上の位置**: GitHub の `TatsuhitoDT/vault` では **`tennis-reservation/` はリポジトリルート直下**（旧レイアウトの `vault/tennis-reservation` は廃止）。Vercel の **Root Directory** は **`tennis-reservation`** に設定すること。
+**GitHub と Vercel は次のペアで固定。入れ替えないこと**（誤るとデプロイ・環境変数・Supabase が別環境に向く）。
+
+| 環境 | GitHub リポジトリ | Supabase org | Vercel（このチーム／プロジェクト） |
+|------|-------------------|--------------|-----------------------------------|
+| **元環境** | [TatsuhitoDT/vault](https://github.com/TatsuhitoDT/vault) | [dfiufvdhbtaitktitzwh](https://supabase.com/dashboard/org/dfiufvdhbtaitktitzwh) | チーム [mtatsuhito-gmailcoms-projects](https://vercel.com/mtatsuhito-gmailcoms-projects)（vault 用に接続したプロジェクト） |
+| **コピー環境** | [iparkadmin/tennis-reservation](https://github.com/iparkadmin/tennis-reservation) | [qtgzpqlzgojkjwsigvww](https://supabase.com/dashboard/org/qtgzpqlzgojkjwsigvww) | プロジェクト [muramatsus-projects / tennis-reservation](https://vercel.com/muramatsus-projects/tennis-reservation) |
+
+**元環境とコピー環境の意味（運用方針）**
+
+- **元環境** … **村松が最初に開発した**ときの系統（モノレポ `vault` と個人側 Vercel チーム等）。開発の起点・検証に使う側面がある。
+- **コピー環境** … **公開・共有用にコピー**した系統（単独リポジトリ `iparkadmin/tennis-reservation` と muramatsus 側 Vercel 等）。外向きのデプロイの主たる載せ先。
+- **両環境のアプリは、可能な限り同じ状況（同じ機能・同じコードベース）を維持する**ことを目指す。Supabase は org／プロジェクトが分かれているため **データは別**だが、**スキーマやアプリの改修は揃える**運用とする。
+- 手順の優先度: 通常は**コピー環境を先に更新**する。元環境だけを変えたいときは「元環境で」と明示する。
+- **元環境とコピー環境の切り分け**: コピー環境（公開用）へ反映するときは **GitHub の `iparkadmin/tennis-reservation` に向けて push する**（`push-iparkadmin.ps1` / `publish-iparkadmin-copy.ps1` または同リポジトリへの手動 push）。**個人アカウントの別リポジトリだけに push してコピー環境のデプロイを済ませる、といった取り違えをしない。**
+
+- 詳細: `docs/deployment/ENVIRONMENT_WORKFLOW_RULE.md`
+- Vercel の環境変数（4キー）が誤って上書きされた場合: `docs/deployment/VERCEL_FOUR_KEYS_RECOVERY_AND_PREVENTION.md`
+
+**モノレポ上の位置**: GitHub の `TatsuhitoDT/vault` では **`tennis-reservation/` はリポジトリルート直下**（旧レイアウトの `vault/tennis-reservation` は廃止）。元環境の Vercel では **Root Directory に `tennis-reservation`** を指定する。
+
+![参考図](image/README/1775005588582.png)
 
 ---
 
 ### コピー環境（iparkadmin → muramatsus Vercel）
+
+コピー環境の Git の正は **`https://github.com/iparkadmin/tennis-reservation`**。ここへの push が **muramatsus 側 Vercel** のデプロイにつながる。
 
 - **通常**: `tennis-reservation\scripts\push-iparkadmin.ps1`（vault ルートに `.env.git.local` が必要）。手順は `docs/deployment/15_supabase_keep_alive_setup.md`。
 - **subtree が通らないとき**（GitHub Push Protection、履歴の non-fast-forward など）: `iparkadmin/tennis-reservation` をローカルに clone し、`tennis-reservation\scripts\publish-iparkadmin-copy.ps1 -ClonePath "clone先のパス"` で **ファイル同期＋`main` へ push**（モノレポ履歴は送らない）。詳細は同ドキュメントの **方法 C**。
@@ -172,7 +261,60 @@ tennis-reservation/
 
 ---
 
-## 📝 開発手順
+## アプリ修正からデプロイまでの流れ
+
+### 1. ローカルで修正・確認
+
+1. ターミナルで **`tennis-reservation/app`** に移動する。  
+2. 初回または依存変更後: `npm install`  
+3. 開発サーバー: `npm run dev` → http://localhost:3000  
+4. 必要なら `npm run build` で本番ビルドを事前確認。  
+5. 環境変数は `app/.env.local`（キー名は `app/README.md` 参照）。**値はコミットしない。**
+
+### 2. Git にコミット（vault モノレポのルートで）
+
+アプリだけでなく `tennis-reservation/` 配下のドキュメント・DB 用 SQL など、変更したファイルをまとめてコミットする。
+
+- **コミットメッセージは英語**推奨（Vercel / GitHub 表示での文字化け防止）。例: `feat: ...`, `fix: ...`, `chore: ...`
+- コミット場所の例（vault が `C:\work\vault` の場合）:
+
+```powershell
+cd C:\work\vault
+git add tennis-reservation/
+git status
+git commit -m "feat: describe change in English"
+```
+
+### 3. どちらの環境に載せるか
+
+| 載せたい環境 | 行うこと |
+|--------------|----------|
+| **コピー環境**（通常） | 下記「コピー環境へ push」 |
+| **元環境** | 指示で「元環境」と明示されているとき、下記「元環境へ push」 |
+
+### 4. 元環境へ push → デプロイ
+
+1. **作業ブランチ**を切り、`origin`（`TatsuhitoDT/vault`）へ push。  
+2. GitHub で **Pull Request** を作り、**`main` にマージ**する（リポジトリルールに従う）。  
+3. マージ後、Vercel（**mtatsuhito-gmailcoms-projects** 側の該当プロジェクト）が **`main`** の **`tennis-reservation/`** をビルドし、**Production** が更新される。  
+4. 失敗時は Vercel の **Deployments → Build Logs** を確認。  
+5. 設定の参照: `docs/deployment/GIT_VERCEL_DEPLOY.md`、`docs/deployment/07_vercel_env_variables.md`
+
+### 5. コピー環境へ push → デプロイ
+
+**対象 GitHub は `iparkadmin/tennis-reservation` のみ**（元環境の `TatsuhitoDT/vault` への push だけでは、コピー環境の Vercel は更新されない）。
+
+1. 上記「### コピー環境（iparkadmin → muramatsus Vercel）」のとおり、**`push-iparkadmin.ps1`** または **`publish-iparkadmin-copy.ps1`** で `iparkadmin/tennis-reservation` の **`main`** を更新する。  
+2. GitHub 上で push が反映されたら、Vercel（**muramatsus-projects / tennis-reservation**）がビルド・デプロイする。  
+3. 手順の詳細: `docs/deployment/15_supabase_keep_alive_setup.md`
+
+### 6. スキーマ変更がある場合
+
+アプリだけでなく **Supabase のテーブル・RLS・関数**を変えたときは、`database/supabase/migrations/` の SQL と `docs/app/` の手順に沿って **該当する環境の Supabase ダッシュボード**で実行する。**元／コピーでプロジェクトが違う**ので取り違えないこと。
+
+---
+
+## 📝 開発手順（クイック参照）
 
 ### ローカル開発
 
@@ -184,17 +326,8 @@ npm run dev
 
 http://localhost:3000 でアプリが起動します。
 
-### デプロイ
-
-```bash
-cd app
-git add .
-git commit -m "更新内容"
-git push origin main
-```
-
-Vercelが自動的に再デプロイします。
+**本番反映の全体手順**は上記「**アプリ修正からデプロイまでの流れ**」を参照（`app` 単体で `git push` する構成ではない）。
 
 ---
 
-*最終更新: 2025年3月*
+*最終更新: 2026年4月*
