@@ -6,15 +6,14 @@
 
 ### 環境一覧（作業前確認・間違い防止）
 
-| 環境 | GitHub | Supabase | Vercel |
-|------|--------|----------|--------|
-| **元環境** | [TatsuhitoDT/vault](https://github.com/TatsuhitoDT/vault) | [org/dfiufvdhbtaitktitzwh](https://supabase.com/dashboard/org/dfiufvdhbtaitktitzwh) | [mtatsuhito-gmailcoms-projects](https://vercel.com/mtatsuhito-gmailcoms-projects) |
-| **コピー環境** | [iparkadmin](https://github.com/iparkadmin) | [org/qtgzpqlzgojkjwsigvww](https://supabase.com/dashboard/org/qtgzpqlzgojkjwsigvww) | [muramatsus-projects](https://vercel.com/muramatsus-projects) |
+![1775005588582](image/README/1775005588582.png)**モノレポ上の位置**: GitHub の `TatsuhitoDT/vault` では **`tennis-reservation/` はリポジトリルート直下**（旧レイアウトの `vault/tennis-reservation` は廃止）。Vercel の **Root Directory** は **`tennis-reservation`** に設定すること。
 
-- 通常は**コピー環境**を更新。元環境への変更は「元環境で」と明示する。
-- 詳細: `docs/deployment/ENVIRONMENT_WORKFLOW_RULE.md`
+---
 
-**モノレポ上の位置**: GitHub の `TatsuhitoDT/vault` では **`tennis-reservation/` はリポジトリルート直下**（旧レイアウトの `vault/tennis-reservation` は廃止）。Vercel の **Root Directory** は **`tennis-reservation`** に設定すること。
+### コピー環境（iparkadmin → muramatsus Vercel）
+
+- **通常**: `tennis-reservation\scripts\push-iparkadmin.ps1`（vault ルートに `.env.git.local` が必要）。手順は `docs/deployment/15_supabase_keep_alive_setup.md`。
+- **subtree が通らないとき**（GitHub Push Protection、履歴の non-fast-forward など）: `iparkadmin/tennis-reservation` をローカルに clone し、`tennis-reservation\scripts\publish-iparkadmin-copy.ps1 -ClonePath "clone先のパス"` で **ファイル同期＋`main` へ push**（モノレポ履歴は送らない）。詳細は同ドキュメントの **方法 C**。
 
 ---
 
@@ -70,6 +69,9 @@ tennis-reservation/
 │   ├── src/, public/, package.json, README.md
 │   └── （詳細は app/README.md）
 │
+├── scripts/                      # コピー環境への push 等
+│   ├── push-iparkadmin.ps1       # subtree push
+│   └── publish-iparkadmin-copy.ps1  # ファイル同期 push（subtree 失敗時）
 ├── vercel.json                   # Vercel設定
 ├── .gitignore
 └── README.md

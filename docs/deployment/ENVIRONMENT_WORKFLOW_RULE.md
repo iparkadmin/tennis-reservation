@@ -12,6 +12,17 @@
 
 ---
 
+## GitHub ↔ Vercel の公式ペア（入れ替え禁止）
+
+| 環境 | GitHub | Vercel |
+|------|--------|--------|
+| **元環境** | https://github.com/TatsuhitoDT/vault | チーム https://vercel.com/mtatsuhito-gmailcoms-projects（この vault 向けに接続しているプロジェクト） |
+| **コピー環境** | https://github.com/iparkadmin/tennis-reservation | https://vercel.com/muramatsus-projects/tennis-reservation |
+
+**vault を muramatsus に、iparkadmin/tennis-reservation を mtatsuhito-gmailcoms に繋ぐのは誤り。** デプロイや環境変数が別 Supabase を指す原因になる。
+
+---
+
 ## 元環境
 
 | サービス | URL |
@@ -20,7 +31,7 @@
 | Supabase | https://supabase.com/dashboard/org/dfiufvdhbtaitktitzwh |
 | Vercel | https://vercel.com/mtatsuhito-gmailcoms-projects |
 
-- リポジトリ: vault モノレポ内の tennis-reservation
+- アプリの場所: vault モノレポ内の **`tennis-reservation/`**（Vercel の Root Directory は **`tennis-reservation`**）
 
 ---
 
@@ -28,11 +39,11 @@
 
 | サービス | URL |
 |----------|-----|
-| GitHub | https://github.com/iparkadmin |
+| GitHub | https://github.com/iparkadmin/tennis-reservation |
 | Supabase | https://supabase.com/dashboard/org/qtgzpqlzgojkjwsigvww |
-| Vercel | https://vercel.com/muramatsus-projects |
+| Vercel | https://vercel.com/muramatsus-projects/tennis-reservation |
 
-- リポジトリ: iparkadmin/tennis-reservation（単独）
+- リポジトリ: **単独** `iparkadmin/tennis-reservation`（vault モノレポではない）。Vercel の Root はリポジトリ構成に合わせる（`06_vercel_deployment_guide.md`・README の単独向け記述参照）。
 
 ---
 
@@ -51,12 +62,20 @@
 
 | 作業種別 | 元環境 | コピー環境 |
 |----------|--------|------------|
-| Vercel | mtatsuhito-gmailcoms-projects | muramatsus-projects |
+| Vercel | `vercel.com/mtatsuhito-gmailcoms-projects`（vault 接続プロジェクト） | `vercel.com/muramatsus-projects/tennis-reservation` |
 | Supabase | org/dfiufvdhbtaitktitzwh | org/qtgzpqlzgojkjwsigvww |
-| Git push | vault リポジトリ | iparkadmin/tennis-reservation |
+| Git push | `TatsuhitoDT/vault` | `iparkadmin/tennis-reservation` |
+
+---
+
+## Vercel 環境変数（4キー）の復旧・再発防止
+
+設定が別環境の Supabase や別 URL に**書き換わってしまった**場合は、次を正とする。
+
+- **[VERCEL_FOUR_KEYS_RECOVERY_AND_PREVENTION.md](./VERCEL_FOUR_KEYS_RECOVERY_AND_PREVENTION.md)** — 4 つの環境変数の正しい入れ方、Supabase Auth との整合、再発防止
 
 ---
 
 ## 関連ルール
 
-- `.cursor/rules/environment-workflow.mdc` に同内容の Cursor ルールあり
+- `.cursor/rules/environment-workflow.mdc` に同内容の Cursor ルールあり（プロジェクトに存在する場合）

@@ -2,8 +2,6 @@
 
 ## 📚 ドキュメント構成
 
-## 📚 ドキュメント構成
-
 ### 事業要件定義書
 
 - **[business/01_requirements_specification.md](./business/01_requirements_specification.md)**
@@ -69,6 +67,9 @@
 - **[deployment/07_vercel_env_variables.md](./deployment/07_vercel_env_variables.md)**
   - Vercelの環境変数設定に特化したガイド
   - `supabaseUrl is required`エラーの解決方法
+
+- **[deployment/VERCEL_FOUR_KEYS_RECOVERY_AND_PREVENTION.md](./deployment/VERCEL_FOUR_KEYS_RECOVERY_AND_PREVENTION.md)**
+  - Vercel の 4 環境変数が誤った環境の値に**書き換わったときの復旧**手順と**再発防止**（元/コピーと Supabase の対応）
 
 - **[deployment/08_supabase_setup_guide.md](./deployment/08_supabase_setup_guide.md)**
   - Supabaseデータベースのセットアップガイド

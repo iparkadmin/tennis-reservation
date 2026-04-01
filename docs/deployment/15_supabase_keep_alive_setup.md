@@ -42,6 +42,32 @@ git push origin main
 
 ※ 初回は `git remote add iparkadmin https://github.com/iparkadmin/tennis-reservation.git` が必要
 
+### 方法 C: ファイル同期（subtree が失敗するとき・推奨の代替）
+
+次のとき **git subtree を使わず**、`vault/tennis-reservation` の中身を **単独リポジトリの作業ツリーにコピー**してから commit / push する。
+
+- `git subtree push` が **non-fast-forward** で拒否される
+- GitHub の **Push Protection** により、モノレポの**過去コミットに含まれる別ディレクトリの秘密**などで push がブロックされる
+
+**手順**
+
+1. 別フォルダに `iparkadmin/tennis-reservation` を clone する。  
+   例: `git clone https://github.com/iparkadmin/tennis-reservation.git C:\work\iparkadmin-tennis-reservation`
+2. vault ルートに `.env.git.local`（`GITHUB_USERNAME` / `GITHUB_PAT`）を用意する（方法 A と同じ）。
+3. PowerShell で実行する。
+
+   ```powershell
+   cd tennis-reservation\scripts
+   .\publish-iparkadmin-copy.ps1 -ClonePath "C:\work\iparkadmin-tennis-reservation"
+   ```
+
+4. GitHub の `iparkadmin/tennis-reservation` の `main` が更新されれば、Vercel **muramatsus-projects / tennis-reservation** がデプロイを取りにいく（Git 連携済みの場合）。
+
+**注意**
+
+- コピーは **ミラーではない**（`/E` のみ）。vault 側で削除したファイルが clone 側に残る場合は、clone 側で `git rm` などして整理する。
+- `git pull --ff-only origin main` が失敗する場合は、clone 先の `main` が分岐している。手動で `main` を整えてから再実行する。
+
 ---
 
 **注意**: `.github/workflows/` を含む push には、PAT に **workflow** スコープが必要です。GitHub → Settings → Developer settings → Personal access tokens で、対象トークンに `workflow` を付与してください。

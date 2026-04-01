@@ -47,12 +47,12 @@
 
 | Key | Value |
 |-----|-------|
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://yawzyrzfbphxrthlrzjg.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | （Supabase の anon public キー） |
-| `NEXT_PUBLIC_APP_URL` | いったん `https://localhost:3000` で可。デプロイ後に本番 URL に変更して Redeploy |
-| `SUPABASE_SERVICE_ROLE_KEY` | （Supabase の service_role キー） |
+| `NEXT_PUBLIC_SUPABASE_URL` | 接続先 Supabase プロジェクトの Project URL（**元/コピーで別プロジェクト**。下の注意） |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 同一プロジェクトの anon（public）キー |
+| `NEXT_PUBLIC_APP_URL` | いったん `https://localhost:3000` で可。デプロイ後に **この Vercel プロジェクトの** 本番 URL に変更して Redeploy |
+| `SUPABASE_SERVICE_ROLE_KEY` | 同一プロジェクトの service_role キー |
 
-値は **`tennis-reservation/app/.env.local`** を参照してください。
+値は **`tennis-reservation/app/.env.local`**（または対象環境の控え）を参照。**別環境の Supabase を混ぜないこと**。復旧・対応表は [VERCEL_FOUR_KEYS_RECOVERY_AND_PREVENTION.md](./VERCEL_FOUR_KEYS_RECOVERY_AND_PREVENTION.md)。
 
 ---
 

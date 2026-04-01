@@ -41,10 +41,10 @@
 | 項目 | 値 |
 |------|-----|
 | **Key** | `NEXT_PUBLIC_APP_URL` |
-| **Value** | 本番: `https://tennis-reservation-one.vercel.app` |
+| **Value** | **その Vercel プロジェクト**の本番 URL（Deployments に表示される `https://….vercel.app`）。環境ごとに異なるためダッシュボードでコピー。 |
 | **Environment** | Production, Preview, Development（すべてチェック） |
 
-**注意**: `NEXT_PUBLIC_APP_URL`は、初回デプロイ後にVercelが提供するURLに更新してください。
+**注意**: README 等に例として別の `*.vercel.app` が書いてあっても、**正は常に該当プロジェクトの URL**。混線時は [VERCEL_FOUR_KEYS_RECOVERY_AND_PREVENTION.md](./VERCEL_FOUR_KEYS_RECOVERY_AND_PREVENTION.md) を参照。
 
 #### 4. SUPABASE_SERVICE_ROLE_KEY（アカウント削除機能用・推奨）
 
