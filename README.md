@@ -103,7 +103,7 @@ AI（Cursor 等）向けの強制ルールは **リポジトリルート**の `.
 
 - 詳細: `docs/deployment/ENVIRONMENT_WORKFLOW_RULE.md`
 - Vercel の環境変数（4キー）が誤って上書きされた場合: `docs/deployment/VERCEL_FOUR_KEYS_RECOVERY_AND_PREVENTION.md`
-- **Deployments に iparkadmin 名義の Blocked Preview が並ぶとき**（意味のない二重行）: `docs/deployment/VERCEL_IPARKADMIN_BLOCKED_PREVIEW.md`（**Vercel／GitHub の Git 接続を `TatsuhitoDT` に一本化**する手順。余計な push を増やすのではなく接続整理）
+- **Deployments で先に iparkadmin 名義の Blocked Preview が並ぶとき**（タイムライン上は **余計な「第一」系統**で、続く **TatsuhitoDT の Production** が本命。いわゆる「謎の第二プッシュ」ではなく **謎の第一プッシュ／第一系統**）: `docs/deployment/VERCEL_IPARKADMIN_BLOCKED_PREVIEW.md`
 
 **モノレポ上の位置**: GitHub の `TatsuhitoDT/vault` では **`tennis-reservation/` はリポジトリルート直下**（旧レイアウトの `vault/tennis-reservation` は廃止）。元環境の Vercel では **Root Directory に `tennis-reservation`** を指定する。
 

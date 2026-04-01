@@ -1,6 +1,6 @@
 # iparkadmin 名義の Blocked Preview を止める（元環境・`TatsuhitoDT/vault`）
 
-Deployments に **Author: iparkadmin**・**Preview**・**Blocked** が並び、続けて **TatsuhitoDT** の **Production** が動く、という二重表示になることがある。
+タイムラインでは **先に** **Author: iparkadmin**・**Preview**・**Blocked** の行が出て、その **あとに** **TatsuhitoDT** の **Production** が動く、という並びになることがある。困るのは **余計な第一系統（iparkadmin 側）** であり、「謎の第二プッシュ」ではなく **謎の第一プッシュ／第一系統** と捉えると運用と一致しやすい。
 
 ## 原因（リポジトリに「無意味な push」が増えているわけではないことが多い）
 

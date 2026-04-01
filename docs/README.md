@@ -91,7 +91,7 @@
   - 即座にVercelにデプロイするためのクイックガイド
 
 - **[deployment/VERCEL_IPARKADMIN_BLOCKED_PREVIEW.md](./deployment/VERCEL_IPARKADMIN_BLOCKED_PREVIEW.md)**
-  - 元環境（vault）で **iparkadmin 名義の Blocked Preview** が出るときの原因と、Vercel／GitHub 接続の一本化手順
+  - 元環境（vault）で **先に iparkadmin 名義の Blocked Preview（第一系統）** が出るときの原因と、Vercel／GitHub 接続の一本化手順
 
 - **[deployment/ENVIRONMENT_WORKFLOW_RULE.md](./deployment/ENVIRONMENT_WORKFLOW_RULE.md)** ※AI・開発者向け
   - 元環境・コピー環境の作業対象ルール（GitHub OAuth 誤承認時の即停止手順を含む）
