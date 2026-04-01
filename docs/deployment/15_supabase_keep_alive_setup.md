@@ -2,11 +2,11 @@
 
 Supabase 無料プランでは、**7日間アクティビティがない**とプロジェクトがポーズし、その後削除される可能性があります。このガイドでは、GitHub Actions で定期的に DB にアクセスし、ポーズを防ぐ仕組みのセットアップ方法を説明します。
 
-**デフォルト環境**: 通常は**コピー環境（iparkadmin）**を先に更新する。元環境の更新は明示的に指定する。
+**どちらの Git に載せるか**: **元環境だけ**のときは **`TatsuhitoDT/vault` の `origin` へだけ** push する（本節の iparkadmin 手順は使わない）。**コピー環境（`iparkadmin/tennis-reservation`）へ反映するときだけ**、以下の方法 A〜C を使う。
 
 ---
 
-## Push 手順（デフォルト: iparkadmin を先に）
+## コピー環境（iparkadmin）へ push するときの手順
 
 ### 方法 A: .env.git.local を使う（推奨）
 
@@ -19,13 +19,13 @@ PAT をローカルに保存し、スクリプトで利用する方法です。
    （モノレポ **vault** のリポジトリルートで実行。）  
    `.env.git.local` を編集し、`GITHUB_USERNAME` と `GITHUB_PAT` を設定（`.env.git.local` は `.gitignore` で除外済み）
 
-2. **スクリプトで push**
+2. **コピー先が iparkadmin であることを確認したうえで**スクリプトで push
    ```powershell
    cd tennis-reservation\scripts
    .\push-iparkadmin.ps1
    ```
 
-3. **続けて vault へ push する場合**
+3. **vault（元環境）の履歴も GitHub に残す必要がある場合のみ**、続けて vault へ push
    ```powershell
    cd c:\Dev\vault
    git push origin main
@@ -36,7 +36,7 @@ PAT をローカルに保存し、スクリプトで利用する方法です。
 ```powershell
 cd c:\Dev\vault
 git subtree push --prefix=tennis-reservation iparkadmin main
-# 続けて vault へ push する場合
+# vault の変更も origin に残す必要がある場合のみ
 git push origin main
 ```
 

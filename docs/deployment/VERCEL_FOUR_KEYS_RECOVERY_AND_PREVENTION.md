@@ -78,7 +78,7 @@
 | **変更前スナップショット** | Vercel の Environment Variables 画面を **変更前にスクショ or メモ**（値は秘密情報なので **パスワードマネージャ**に保存するのが安全）。 |
 | **新規 Import で注意** | 同じ Git リポジトリを **別 Vercel プロジェクトに再度 Import** すると、ウィザードで **別の env を入力**し直し、既存プロジェクトと取り違えやすい。**既存プロジェクトの Settings だけ**を触る運用に寄せる。 |
 | **Root Directory の確認** | vault モノレポは **`tennis-reservation`**。単独リポジトリは **`app`** かルートか、**`06_vercel_deployment_guide.md`** と README の「モノレポ上の位置」に合わせる。 |
-| **AI・作業者への指示** | 環境指定なしの作業は **コピー環境**（`ENVIRONMENT_WORKFLOW_RULE.md`）。**元環境の Vercel を触るなら「元環境で」と明示**する。 |
+| **AI・作業者への指示** | 環境指定なしのときは **先に元／コピーを確認**（`ENVIRONMENT_WORKFLOW_RULE.md`）。**iparkadmin 向けスクリプトはコピー明示後のみ**。**元環境の Vercel を触るなら「元環境で」と明示**する。 |
 
 ---
 

@@ -90,9 +90,12 @@
 - **[deployment/GIT_VERCEL_DEPLOY.md](./deployment/GIT_VERCEL_DEPLOY.md)** / **[VERCEL_DEPLOY_STEPS.md](./deployment/VERCEL_DEPLOY_STEPS.md)**
   - 即座にVercelにデプロイするためのクイックガイド
 
+- **[deployment/VERCEL_IPARKADMIN_BLOCKED_PREVIEW.md](./deployment/VERCEL_IPARKADMIN_BLOCKED_PREVIEW.md)**
+  - 元環境（vault）で **iparkadmin 名義の Blocked Preview** が出るときの原因と、Vercel／GitHub 接続の一本化手順
+
 - **[deployment/ENVIRONMENT_WORKFLOW_RULE.md](./deployment/ENVIRONMENT_WORKFLOW_RULE.md)** ※AI・開発者向け
-  - 元環境・コピー環境の作業対象ルール
-  - 通常はコピー環境を更新、元環境は明示的に指定
+  - 元環境・コピー環境の作業対象ルール（GitHub OAuth 誤承認時の即停止手順を含む）
+  - 環境未指定時は AI が iparkadmin を自動実行しない（先に元／コピーを確認）。コピーは明示後に iparkadmin へ
 
 - **[deployment/VERCEL_IMPORT_SETUP.md](./deployment/VERCEL_IMPORT_SETUP.md)**
   - 単独リポジトリでの Vercel インポート・デプロイ設定

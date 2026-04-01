@@ -7,9 +7,11 @@
 
 ## 基本方針
 
-- **通常**: コピー環境を更新する
-- **元環境を更新する場合**: 指示で「元環境」と明示する
+- **人間の運用**では公開用コピーを先に揃えたいことが多いが、**AI・スクリプトは環境が確定するまで iparkadmin 向け push を実行しない**（無用な二段 push・ブロック回避のため）。
+- **元環境を更新する場合**: 指示で「元環境」と明示する（このとき **iparkadmin 系は使わない**）。
+- **コピー環境を更新する場合**: 指示で「コピー環境」または「iparkadmin」と明示する。
 - **コピー環境への反映は iparkadmin 経由**: 元環境（`TatsuhitoDT/vault`）と役割を分けたうえで、**公開用コピーへ載せる変更は必ず `iparkadmin/tennis-reservation` に push する**。別の GitHub アカウント／別リポジトリだけを更新してコピー環境のデプロイを代替しない（Vercel・Supabase のペアがずれる）。
+- **元環境のみの指示があったとき**: **`iparkadmin` への push・`publish-iparkadmin-copy.ps1`・`push-iparkadmin.ps1`・iparkadmin clone への同期は行わない**。デプロイは **`TatsuhitoDT/vault` の `main` 更新**（通常はブランチ → PR → マージ）だけで行う。
 
 ---
 
@@ -21,6 +23,24 @@
 | **コピー環境** | https://github.com/iparkadmin/tennis-reservation | https://vercel.com/muramatsus-projects/tennis-reservation |
 
 **vault を muramatsus に、iparkadmin/tennis-reservation を mtatsuhito-gmailcoms に繋ぐのは誤り。** デプロイや環境変数が別 Supabase を指す原因になる。
+
+**Deployments に iparkadmin 名義の Blocked Preview が並ぶとき**（push を増やしても解決しないことが多い）: [VERCEL_IPARKADMIN_BLOCKED_PREVIEW.md](./VERCEL_IPARKADMIN_BLOCKED_PREVIEW.md)
+
+---
+
+## GitHub OAuth・GitHub App・リポジトリアクセス（誤承認時は即ストップ）
+
+Vercel・GitHub Actions・その他連携で **GitHub の承認画面**が出たとき:
+
+1. **表示されている organization / repository** が、上表の **意図した環境の行**と一致するか確認する。
+2. **一致しない場合**（例: コピー用の作業なのに `TatsuhitoDT/vault` だけが選ばれている、逆に iparkadmin だけが出ているのに vault 向けのつもり、など）:
+   - **承認・インストールを完了させない**（キャンセル／拒否）。
+   - 正しいターゲット:
+   - **コピー環境** → **`iparkadmin`** / **`iparkadmin/tennis-reservation`**
+   - **元環境** → **`TatsuhitoDT`** / **`TatsuhitoDT/vault`**
+   - **承認画面の主対象に `TatsuhitoDT`（元）も `iparkadmin`（コピー）も含まれない**→ **上記どちらの正とも一致しない**。キャンセルし、GitHub で正しいユーザー／org に切り替えてから再承認する。
+   - アカウント・org の切り替え、再ログイン、Vercel 側の「Import」や GitHub 側の「Configure」をやり直して、**正しい画面で再度承認**する。
+3. **AI アシスタント**は、ユーザーが誤った承認先を使いそうなとき **WARNING を出して作業を止め**、上記の正しい承認先を URL 付きで指示する（詳細はリポジトリルート `.cursor/rules/tennis-reservation-environments.mdc`）。
 
 ---
 
@@ -53,10 +73,10 @@
 
 | 指示の内容 | 作業対象 |
 |------------|----------|
-| 環境の指定なし | **コピー環境** |
-| 「元環境で」「元環境に」「元環境を」など | **元環境** |
-| 「コピー環境で」 | コピー環境 |
-| 「両方」 | 両方の環境 |
+| 環境の指定なし | **まずユーザーに「元環境／コピー環境／両方」を確認する。確認が取れるまで `push-iparkadmin.ps1`・`publish-iparkadmin-copy.ps1`・`iparkadmin` リモート／clone への push を実行しない。** |
+| 「元環境で」「元環境に」「元環境を」など | **元環境**（`TatsuhitoDT/vault` の `origin` のみ） |
+| 「コピー環境で」「iparkadmin」「公開用」など | **コピー環境**（`iparkadmin/tennis-reservation`） |
+| 「両方」 | 両方の環境（順序はユーザー指示または「vault → その後コピー」と明示） |
 
 ---
 

@@ -80,16 +80,30 @@
 | **元環境** | [TatsuhitoDT/vault](https://github.com/TatsuhitoDT/vault) | [dfiufvdhbtaitktitzwh](https://supabase.com/dashboard/org/dfiufvdhbtaitktitzwh) | チーム [mtatsuhito-gmailcoms-projects](https://vercel.com/mtatsuhito-gmailcoms-projects)（vault 用に接続したプロジェクト） |
 | **コピー環境** | [iparkadmin/tennis-reservation](https://github.com/iparkadmin/tennis-reservation) | [qtgzpqlzgojkjwsigvww](https://supabase.com/dashboard/org/qtgzpqlzgojkjwsigvww) | プロジェクト [muramatsus-projects / tennis-reservation](https://vercel.com/muramatsus-projects/tennis-reservation) |
 
+#### マンダトリ：作業前・push 前・GitHub 承認前（取り違えゼロ）
+
+1. **今回どちら向けか一言で決める**：元環境／コピー環境／両方。**環境が書かれていないとき、AI・自動化は iparkadmin 向けスクリプトや `iparkadmin` への push を実行せず、先に「元／コピー／両方」を確認する**（無用な iparkadmin 試行を防ぐ）。運用の詳細は `docs/deployment/ENVIRONMENT_WORKFLOW_RULE.md`。
+2. **上表と一致しているか確認**：Git の remote・Vercel の「Connected Git Repository」・Supabase ダッシュボードの org・GitHub の OAuth 画面に出る **organization / repository** が、選んだ環境の行だけを指していること。
+3. **GitHub OAuth・GitHub App・リポジトリ選択で間違った行が表示されたら即ストップ**：承認・インストールを**完了させない**（ブラウザでキャンセル／拒否）。正しい行は次のとおり。
+   - **コピー環境向け** … 承認対象に **`iparkadmin`** と **`iparkadmin/tennis-reservation`** が含まれること。
+   - **元環境向け** … 承認対象に **`TatsuhitoDT/vault`**（`TatsuhitoDT`）が含まれること。
+   - **承認画面の主対象が、本番の正である `TatsuhitoDT`（元）または `iparkadmin`（コピー）のどちらも含まない**… **誤承認の可能性が高い**。キャンセルし、意図した環境に合わせてアカウント／org を切り替えてからやり直す。
+4. **元環境だけ**を更新するとき（「コピーは後」「iparkadmin にプッシュしない」など）… **`iparkadmin` リモート・clone・`publish-iparkadmin-copy.ps1`・`push-iparkadmin.ps1` は使わない**。**`TatsuhitoDT/vault` の `origin` へ**ブランチ push → PR → `main` マージでデプロイする。
+5. **誤承認に気づいたら**：ただちに当該 GitHub の Settings → Applications（または Organization の Third-party access）で権限を見直し、**誤って付与したアクセスを削除**したうえで、**正しい org/repo だけ**で付け直す。
+
+AI（Cursor 等）向けの強制ルールは **リポジトリルート**の `.cursor/rules/tennis-reservation-environments.mdc` と `CLAUDE.md` の「tennis-reservation の環境」を参照。
+
 **元環境とコピー環境の意味（運用方針）**
 
 - **元環境** … **村松が最初に開発した**ときの系統（モノレポ `vault` と個人側 Vercel チーム等）。開発の起点・検証に使う側面がある。
 - **コピー環境** … **公開・共有用にコピー**した系統（単独リポジトリ `iparkadmin/tennis-reservation` と muramatsus 側 Vercel 等）。外向きのデプロイの主たる載せ先。
 - **両環境のアプリは、可能な限り同じ状況（同じ機能・同じコードベース）を維持する**ことを目指す。Supabase は org／プロジェクトが分かれているため **データは別**だが、**スキーマやアプリの改修は揃える**運用とする。
-- 手順の優先度: 通常は**コピー環境を先に更新**する。元環境だけを変えたいときは「元環境で」と明示する。
+- 手順の優先度（人間向け）: 公開用を先に揃えたいときは**コピー環境を先**にしてよい。**AI は「先に iparkadmin」と推測して iparkadmin 経路を自動実行しない**（環境未指定なら確認）。元環境だけを変えたいときは「元環境で」と明示する。
 - **元環境とコピー環境の切り分け**: コピー環境（公開用）へ反映するときは **GitHub の `iparkadmin/tennis-reservation` に向けて push する**（`push-iparkadmin.ps1` / `publish-iparkadmin-copy.ps1` または同リポジトリへの手動 push）。**個人アカウントの別リポジトリだけに push してコピー環境のデプロイを済ませる、といった取り違えをしない。**
 
 - 詳細: `docs/deployment/ENVIRONMENT_WORKFLOW_RULE.md`
 - Vercel の環境変数（4キー）が誤って上書きされた場合: `docs/deployment/VERCEL_FOUR_KEYS_RECOVERY_AND_PREVENTION.md`
+- **Deployments に iparkadmin 名義の Blocked Preview が並ぶとき**（意味のない二重行）: `docs/deployment/VERCEL_IPARKADMIN_BLOCKED_PREVIEW.md`（**Vercel／GitHub の Git 接続を `TatsuhitoDT` に一本化**する手順。余計な push を増やすのではなく接続整理）
 
 **モノレポ上の位置**: GitHub の `TatsuhitoDT/vault` では **`tennis-reservation/` はリポジトリルート直下**（旧レイアウトの `vault/tennis-reservation` は廃止）。元環境の Vercel では **Root Directory に `tennis-reservation`** を指定する。
 
