@@ -1,14 +1,11 @@
 # Supabase Keep Alive for tennis-reservation (standalone repo)
 # Prevents free tier project from being paused after 7 days of inactivity
 # See: docs/deployment/15_supabase_keep_alive_setup.md
-
 name: Tennis Reservation - Supabase Keep Alive
-
 on:
   schedule:
     - cron: '0 9 * * 0,3'
   workflow_dispatch:
-
 jobs:
   keep-alive-copy:
     name: Keep alive (Copy)
@@ -20,13 +17,13 @@ jobs:
             echo "Error: SUPABASE_URL and SUPABASE_ANON_KEY secrets are required for Copy env."
             exit 1
           fi
-          curl -fsS -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/reservations?select=id&limit=1" \
+          curl -fsS -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/_keep_alive" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Accept: application/json" \
-            -H "Prefer: count=exact"
+            -H "Content-Type: application/json" \
+            -H "Prefer: resolution=merge-duplicates" \
+            -d '{"id":1,"last_run":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}'
           echo "Keep-alive succeeded (Copy)"
-
   keep-alive-origin:
     name: Keep alive (Origin)
     runs-on: ubuntu-latest
