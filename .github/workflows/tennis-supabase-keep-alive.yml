@@ -11,15 +11,26 @@ jobs:
     name: Keep alive (Copy)
     runs-on: ubuntu-latest
     steps:
-      - name: Debug Copy secrets (temporary)
+      - name: Debug Copy request (temporary)
         env:
           URL: ${{ secrets.SUPABASE_URL }}
           KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          echo "URL length: ${#URL}"
-          echo "URL tail: $(echo -n "$URL" | tail -c5)"
-          echo "KEY length: ${#KEY}"
-          echo "KEY prefix: ${KEY:0:7}"
+          echo "=== GET /rest/v1/ ==="
+          curl -sS -o /tmp/body.txt -w "HTTP %{http_code}\n" \
+            "$URL/rest/v1/" \
+            -H "apikey: $KEY" \
+            -H "Authorization: Bearer $KEY" || true
+          echo "--- response body ---"
+          cat /tmp/body.txt || true
+          echo ""
+          echo "=== GET /auth/v1/settings (no auth) ==="
+          curl -sS -o /tmp/body2.txt -w "HTTP %{http_code}\n" \
+            "$URL/auth/v1/settings" \
+            -H "apikey: $KEY" || true
+          echo "--- response body ---"
+          cat /tmp/body2.txt || true
+          echo ""
       - name: Ping Supabase (Copy)
         run: |
           if [ -z "${{ secrets.SUPABASE_URL }}" ] || [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
