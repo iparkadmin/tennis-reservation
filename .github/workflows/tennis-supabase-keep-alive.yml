@@ -11,50 +11,17 @@ jobs:
     name: Keep alive (Copy)
     runs-on: ubuntu-latest
     steps:
-      - name: Debug Copy request (temporary)
-        env:
-          URL: ${{ secrets.SUPABASE_URL }}
-          KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: |
-          echo "=== GET /rest/v1/reservations (test anon on known table) ==="
-          curl -sS -o /tmp/r.txt -w "HTTP %{http_code}\n" \
-            "$URL/rest/v1/reservations?select=id&limit=1" \
-            -H "apikey: $KEY" \
-            -H "Authorization: Bearer $KEY" || true
-          echo "--- body ---"
-          cat /tmp/r.txt || true
-          echo ""
-          echo "=== GET /rest/v1/_keep_alive (check if table exists) ==="
-          curl -sS -o /tmp/k.txt -w "HTTP %{http_code}\n" \
-            "$URL/rest/v1/_keep_alive?select=id&limit=1" \
-            -H "apikey: $KEY" \
-            -H "Authorization: Bearer $KEY" || true
-          echo "--- body ---"
-          cat /tmp/k.txt || true
-          echo ""
-          echo "=== POST /rest/v1/_keep_alive (reproduce failing call) ==="
-          curl -sS -o /tmp/p.txt -w "HTTP %{http_code}\n" \
-            -X POST "$URL/rest/v1/_keep_alive" \
-            -H "apikey: $KEY" \
-            -H "Authorization: Bearer $KEY" \
-            -H "Content-Type: application/json" \
-            -H "Prefer: resolution=merge-duplicates" \
-            -d '{"id":1,"last_run":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}' || true
-          echo "--- body ---"
-          cat /tmp/p.txt || true
-          echo ""
       - name: Ping Supabase (Copy)
         run: |
           if [ -z "${{ secrets.SUPABASE_URL }}" ] || [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
             echo "Error: SUPABASE_URL and SUPABASE_ANON_KEY secrets are required for Copy env."
             exit 1
           fi
-          curl -fsS -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/_keep_alive" \
+          curl -fsS -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/reservations?select=id&limit=1" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Content-Type: application/json" \
-            -H "Prefer: resolution=merge-duplicates" \
-            -d '{"id":1,"last_run":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}'
+            -H "Accept: application/json" \
+            -H "Prefer: count=exact"
           echo "Keep-alive succeeded (Copy)"
   keep-alive-origin:
     name: Keep alive (Origin)
