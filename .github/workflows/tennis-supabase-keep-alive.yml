@@ -17,11 +17,12 @@ jobs:
             echo "Error: SUPABASE_URL and SUPABASE_ANON_KEY secrets are required for Copy env."
             exit 1
           fi
-          curl -fsS -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/reservations?select=id&limit=1" \
+          curl -fsS -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/_keep_alive" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Accept: application/json" \
-            -H "Prefer: count=exact"
+            -H "Content-Type: application/json" \
+            -H "Prefer: resolution=merge-duplicates" \
+            -d '{"id":1,"last_run":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}'
           echo "Keep-alive succeeded (Copy)"
   keep-alive-origin:
     name: Keep alive (Origin)
