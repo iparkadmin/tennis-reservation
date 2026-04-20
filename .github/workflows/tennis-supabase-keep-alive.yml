@@ -11,6 +11,15 @@ jobs:
     name: Keep alive (Copy)
     runs-on: ubuntu-latest
     steps:
+      - name: Debug Copy secrets (temporary)
+        env:
+          URL: ${{ secrets.SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          echo "URL length: ${#URL}"
+          echo "URL tail: $(echo -n "$URL" | tail -c5)"
+          echo "KEY length: ${#KEY}"
+          echo "KEY prefix: ${KEY:0:7}"
       - name: Ping Supabase (Copy)
         run: |
           if [ -z "${{ secrets.SUPABASE_URL }}" ] || [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
