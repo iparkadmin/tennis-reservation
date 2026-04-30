@@ -75,10 +75,24 @@
 
 **GitHub と Vercel は次のペアで固定。入れ替えないこと**（誤るとデプロイ・環境変数・Supabase が別環境に向く）。
 
-| 環境 | GitHub リポジトリ | Supabase org | Vercel（このチーム／プロジェクト） |
-|------|-------------------|--------------|-----------------------------------|
-| **元環境** | [TatsuhitoDT/vault](https://github.com/TatsuhitoDT/vault) | [dfiufvdhbtaitktitzwh](https://supabase.com/dashboard/org/dfiufvdhbtaitktitzwh) | チーム [mtatsuhito-gmailcoms-projects](https://vercel.com/mtatsuhito-gmailcoms-projects)（vault 用に接続したプロジェクト） |
-| **コピー環境** | [iparkadmin/tennis-reservation](https://github.com/iparkadmin/tennis-reservation) | [qtgzpqlzgojkjwsigvww](https://supabase.com/dashboard/org/qtgzpqlzgojkjwsigvww) | プロジェクト [muramatsus-projects / tennis-reservation](https://vercel.com/muramatsus-projects/tennis-reservation) |
+| 環境 | GitHub | Vercel チーム / プロジェクト | Vercel Domain（公開URL） | Supabase org | Supabase project ref | Region |
+|---|---|---|---|---|---|---|
+| **元環境** | [TatsuhitoDT/vault](https://github.com/TatsuhitoDT/vault) | チーム [mtatsuhito-gmailcoms-projects](https://vercel.com/mtatsuhito-gmailcoms-projects) | https://tennis-reservation-one.vercel.app | [dfiufvdhbtaitktitzwh](https://supabase.com/dashboard/org/dfiufvdhbtaitktitzwh) | **`yawzyrzfbphxrthlrzjg`** | `ap-southeast-1` (Singapore) |
+| **コピー環境** | [iparkadmin/tennis-reservation](https://github.com/iparkadmin/tennis-reservation) | プロジェクト [muramatsus-projects / tennis-reservation](https://vercel.com/muramatsus-projects/tennis-reservation) | https://tennis-reservation-five.vercel.app | [qtgzpqlzgojkjwsigvww](https://supabase.com/dashboard/org/qtgzpqlzgojkjwsigvww) | **`tyvhzenwdiiwzpldvbrf`** | `ap-northeast-1` (Tokyo) |
+
+> **元環境の region について**: 元環境のみ Singapore（コピー環境は Tokyo）。Supabase は既存プロジェクトの region 変更を**サポートしていない**（新規プロジェクト作成 + 全データ移行が必要）。テニス予約用途ではレイテンシ差が体感に影響しないため、移行はせず**現状維持**とする。参照: [Supabase Docs](https://supabase.com/docs/guides/troubleshooting/change-project-region-eWJo5Z)。
+
+#### 直リンク（クリックで該当画面へ）
+
+| 用途 | 元環境 | コピー環境 |
+|---|---|---|
+| Supabase ダッシュボード | https://supabase.com/dashboard/project/yawzyrzfbphxrthlrzjg | https://supabase.com/dashboard/project/tyvhzenwdiiwzpldvbrf |
+| Supabase SQL Editor | https://supabase.com/dashboard/project/yawzyrzfbphxrthlrzjg/sql/new | https://supabase.com/dashboard/project/tyvhzenwdiiwzpldvbrf/sql/new |
+| Supabase API Settings | https://supabase.com/dashboard/project/yawzyrzfbphxrthlrzjg/settings/api | https://supabase.com/dashboard/project/tyvhzenwdiiwzpldvbrf/settings/api |
+| Supabase Auth URL Config | https://supabase.com/dashboard/project/yawzyrzfbphxrthlrzjg/auth/url-configuration | https://supabase.com/dashboard/project/tyvhzenwdiiwzpldvbrf/auth/url-configuration |
+| Vercel デプロイ画面 | https://vercel.com/mtatsuhito-gmailcoms-projects | https://vercel.com/muramatsus-projects/tennis-reservation/deployments |
+
+（最新 Deployment URL は変動するため記録しない。常に Vercel の Deployments タブを正とする。）
 
 #### マンダトリ：作業前・push 前・GitHub 承認前（取り違えゼロ）
 
