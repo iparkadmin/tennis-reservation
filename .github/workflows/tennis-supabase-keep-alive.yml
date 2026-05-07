@@ -1,5 +1,8 @@
 # Supabase Keep Alive for tennis-reservation (standalone repo)
 # Prevents free tier project from being paused after 7 days of inactivity
+# 2026-05-07: Copy job switched from POST upsert on `_keep_alive` to GET on `reservations`.
+#   Reason: Supabase did not count POST upsert on underscore-prefixed `_keep_alive`
+#   as activity. Pause notice arrived despite successful writes.
 # See: docs/deployment/15_supabase_keep_alive_setup.md
 name: Tennis Reservation - Supabase Keep Alive
 on:
@@ -17,12 +20,12 @@ jobs:
             echo "Error: SUPABASE_URL and SUPABASE_ANON_KEY secrets are required for Copy env."
             exit 1
           fi
-          curl -fsS -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/_keep_alive" \
+          curl -fsS -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/reservations?select=id&limit=1" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Content-Type: application/json" \
-            -H "Prefer: resolution=merge-duplicates" \
-            -d '{"id":1,"last_run":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}'
+            -H "Accept: application/json" \
+            -H "Prefer: count=exact"
+          echo ""
           echo "Keep-alive succeeded (Copy)"
   keep-alive-origin:
     name: Keep alive (Origin)
@@ -37,6 +40,5 @@ jobs:
           curl -fsS -X GET "${{ secrets.TENNIS_ORIGIN_SUPABASE_URL }}/rest/v1/reservations?select=id&limit=1" \
             -H "apikey: ${{ secrets.TENNIS_ORIGIN_SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.TENNIS_ORIGIN_SUPABASE_ANON_KEY }}" \
-            -H "Accept: application/json" \
-            -H "Prefer: count=exact"
+            -H "Accept: application/json"
           echo "Keep-alive succeeded (Origin)"
